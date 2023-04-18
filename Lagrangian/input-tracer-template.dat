@@ -1,0 +1,410 @@
+#-----------------------------------------------------------------------------------------------------
+# ABOUT:
+# ------
+# This is an example of the ASCII form user-input data for running a tracer dynamics
+# code using the VTK based script simpleTracers, with full documentation.
+#
+# INSTRUCTIONS:
+# -------------
+# - Every line starting with a '#' is a comment and will be ignored by the code.
+# - Appropriate parameters for each field (identified by a human-readable variable tag)
+#   has to be entered after the '=' sign for each tag.
+# - The int/float/string/bool data format has been indicated for each variable in the documentation
+# - Between each TAG variable and values  - place a ":"
+# - To separate TAG variables             - place a ";"
+# - To separate multiple values for a TAG - place a ","
+#
+# Authors:      Debanjan Mukherjee, Zachariah Irwin, Joseph Wilson
+# Institution:  University of Colorado, Boulder
+# Latest edits: March 2021
+#-----------------------------------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------------------------------
+# 1. General Configuration:
+#-----------------------------------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------------------------------
+# Problem dimension [INT]
+#-----------------------------------------------------------------------------------------------------
+Problem dimension = 2
+
+#-----------------------------------------------------------------------------------------------------
+# Program run in debug mode (with detailed log messages) or not [STRING: True/False]
+#-----------------------------------------------------------------------------------------------------
+Debug mode = False
+
+#-----------------------------------------------------------------------------------------------------
+# 2. File and Path Inputs:
+#-----------------------------------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------------------------------
+# Project directory, with trailing '/' [STRING]
+#
+# Notes:
+# ------
+# - If input file is in the Project Inputs directory then simply enter 'default'
+#
+## Location of directory containing subdirectories for input/output
+#-----------------------------------------------------------------------------------------------------
+Project directory = default
+
+#-----------------------------------------------------------------------------------------------------
+# Flow data directory, with trailing '/' [STRING]
+#
+## Directory for input velocity dat
+#-----------------------------------------------------------------------------------------------------
+Flow data directory = none
+
+#-----------------------------------------------------------------------------------------------------
+# File tag that identifies flow data files as "<file-tag>XX.vtk" etc. [STRING]
+#
+## Used for flow fields spanning multiple time series
+#-----------------------------------------------------------------------------------------------------
+Flow data file tag = none
+
+#-----------------------------------------------------------------------------------------------------
+# Variable name that is used to identify the flow data in the vtk/vtu files [STRING]
+#-----------------------------------------------------------------------------------------------------
+Flow data field name = f_11
+
+#-----------------------------------------------------------------------------------------------------
+# Polydata format file that is used to input tracers into the flow domain for integration [STRING]
+#
+## Mesh for particle integration, e.g. our bounding box for ABC flow
+## Set to 'none' for cartesian tracer injections (see below).
+#-----------------------------------------------------------------------------------------------------
+Tracer input file = file.vtk
+
+#-----------------------------------------------------------------------------------------------------
+# Special functionality to merge Lagrangian computations with Discrete element type computations
+# [STRING, STRING]
+#
+# Notes:
+# ------
+# - For future development, add variable fields by entering "; FIELDNAME : fieldvalue" to this line
+# - Once added, edit the appropriate tag in "tracerInput.py" and reload module
+#-----------------------------------------------------------------------------------------------------
+Discrete element input file = ENSEMBLE : particles.dat ; TRANSFORM : transformdata.dat
+
+#-----------------------------------------------------------------------------------------------------
+# Filename template that will be used to determine output files where Lagrangian data will be dumped
+# [STRING]
+#
+# Note:
+# -----
+# - file.vtk will lead to outputs for time-varying Lagrangian data be fileXX.vtk for XX time-indices
+#-----------------------------------------------------------------------------------------------------
+Lagrangian field output file = file.vtk
+
+#-----------------------------------------------------------------------------------------------------
+# Filename template that will be used to determine output files where Tracer vtp data will be dumped
+# [STRING]
+#
+# Note:
+# -----
+# - file.vtk will lead to outputs for time-varying particle data be fileXX.vtk for XX time-indices
+#-----------------------------------------------------------------------------------------------------
+Lagrangian tracer output file = file.vtk
+
+#-----------------------------------------------------------------------------------------------------
+# Index system for velocity (and pressure) file slices for different time-steps
+# [INT, INT, INT, INT]
+#
+# Notes:
+# ------
+# - START : the index that holds the first time-step data
+# - STOP  : the index that holds the last time-step data
+# - COUNT : the total number of time-steps saved for computation
+# - Assuming the entry in "Flow data file tag" above is f, the velocity file names are of the form:
+#   f<index>.vtk/vtu for index=START; index<=STOP; index=index+COUNT
+# - For simulations involving steady flow data, simply set COUNT = 1
+#-----------------------------------------------------------------------------------------------------
+Data file index = START : 1 ; STOP : 10 ; DELTA : 1 ; COUNT : 50
+
+#-----------------------------------------------------------------------------------------------------
+# The actual time-instances for the corresponding file slices for velocity (and pressure)
+# [FLOAT, FLOAT, FLOAT, STRING: True/False]
+#
+# Notes:
+# ------
+# - START     : the time when the first of the velocity/pressure files was saved
+# - STOP      : the time when the last of the velocity/pressure files was saved
+# - DELTA     : the time-interval between each index/instant when files were saved
+# - PERIODIC  : for periodic simulations, use modulo(time) and place first time-step after last (loop)
+#-----------------------------------------------------------------------------------------------------
+Data file timing = START : 0.0 ; STOP : 1.0 ; DELTA : 0.01 ; PERIODIC : True
+
+#-----------------------------------------------------------------------------------------------------
+# Index system for Lagrangian/particle file slices for different time-steps
+# [INT, INT, INT]
+#
+# NEED TO BE INTEGRATED AT A FUTURE STAGE
+#
+# Notes:
+# -----
+# - START : the index of the first output file
+# - STOP  : the index of the last output file
+# - DELTA : spacing between indices
+# - Assuming the entry in "Lagrangian/Tracer output file" above is L, the Lagrangian/Tracer file
+#   names are of the form:
+#   L<index>.vtk for index=START; index<=STOP; index=index+DELTA
+#-----------------------------------------------------------------------------------------------------
+Output file index = START : 0 ; STOP : 9 ; DELTA : 1
+
+#-----------------------------------------------------------------------------------------------------
+# The actual time-instances for the corresponding file indexes for Lagrangian/Tracer files
+# [FLOAT, FLOAT]
+#
+# NEED TO BE INTEGRATED AT A FUTURE STAGE
+#
+# Notes:
+# ------
+# - START    : the beginning of the integration window (FTLE)
+# - INTERVAL : spacing between integration windows (typically matches Data file timing DELTA)
+# - When combined with the output file indices, the library will automatically consider one window
+#   length to be (Simulation timing: STOP - Simulation timing: START), hence, these parameters control
+#   which window(s) of integration are of interest
+#-----------------------------------------------------------------------------------------------------
+Output file timing = START : 0.0 ; INTERVAL : 0.01
+
+#-----------------------------------------------------------------------------------------------------
+# 3. Simulation Parameters.
+#-----------------------------------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------------------------------
+# The timing parameters that control the integration/simulation of Lagrangian particles/tracers
+# [FLOAT, FLOAT, FLOAT]
+#
+# Notes:
+# ------
+# - the only case that can handle stoptime greater than file timing stop-time is periodic flows
+#-----------------------------------------------------------------------------------------------------
+Simulation timing = START : 0.0 ; STOP : 0.0 ; DELTA : 0.01
+
+#-----------------------------------------------------------------------------------------------------
+# Parameters corresponding to the implementation of the numerical integration scheme
+#-----------------------------------------------------------------------------------------------------
+Integration setup = SCHEME : feu
+
+#-----------------------------------------------------------------------------------------------------
+# Advanced functionality (to be developed in the future): is this a fixed mesh or moving mesh problem?
+# [STRING: True/False]
+#
+## Lagrangian = True, Eulerian = False
+#-----------------------------------------------------------------------------------------------------
+Fixed mesh = True
+
+#-----------------------------------------------------------------------------------------------------
+# Parameters to control which (if any) Lagrangian fields are to be computed
+# [BOOLEAN, BOOLEAN, BOOLEAN]
+#-----------------------------------------------------------------------------------------------------
+Lagrangian module set up = FWDTLE : True ; BWDFTLE : False ; STRETCH : False ; STRAIN : False
+
+#-----------------------------------------------------------------------------------------------------
+# Unit vectors along which to compute Stretch and Strain (if desired)
+# [FLOAT, FLOAT, FLOAT]
+#
+# Notes:
+# ------
+# - Currently each unit vector must be specified and only 3 unit vectors are available
+# - A zero unit vector will not be computed
+#-----------------------------------------------------------------------------------------------------
+Lagrangian kinematics unit vectors = V1 : 1.0 , 0.0 , 0.0 ; V2 : 0.0 , 1.0 , 0.0 ; V3 : 0.0 , 0.0 , 0.0
+
+#-----------------------------------------------------------------------------------------------------
+# Owing to the popularity of standard computational domains for testing and benchmarking,
+# a set of standard geometry domains have been programmed for the flow-field domain
+# [FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT]
+#
+# Anchor - determines a key feature point in the domain that defines the geometry
+# (for our purposes, we have implemented Rectangle, Cuboid, -- Cylinder, Sphere, Circle to be
+#  released in future versions)
+#
+# Hence, here are the various implementations in a library format:
+# ----------------------------------------------------------------
+# 1.  Plane(z-n):    ANCHOR : x0   ; y0    ; 0.0   ; x1  ; y1  ; 0.0 ; R0 : none
+# 2.  Plane(y-n):    ANCHOR : x0   ; 0.0   ; z0    ; x1  ; 0.0 ; z1  ; R0 : none
+# 3.  Plane(x-n):    ANCHOR : none ; y0    ; z0    ; 0.0 ; y1  ; z1  ; R0 : none
+# 4.  Cuboid:        ANCHOR : x0   ; y0    ; z0    ; x1  ; y1  ; z1  ; R0 : none
+# 5.  Cylinder(x):   ANCHOR : x0   ; y0    ; z0    ; DX : dl   ; DY : none ; DZ : none ; R0 : r
+# 6.  Cylinder(y):   ANCHOR : x0   ; y0    ; z0    ; DX : none ; DY : dl   ; DZ : none ; R0 : r
+# 7.  Cylinder(z):   ANCHOR : x0   ; y0    ; z0    ; DX : none ; DY : none ; DZ : dl   ; R0 : r
+# 8.  Sphere:        ANCHOR : x0   ; y0    ; z0    ; DX : none ; DY : none ; DZ : none ; R0 : r
+# 9.  Circle(z-n):   ANCHOR : x0   ; y0    ; none  ; DX : none ; DY : none ; DZ : none ; R0 : r
+# 10. Circle(y-n):   ANCHOR : x0   ; none  ; z0    ; DX : none ; DY : none ; DZ : none ; R0 : r
+# 11. Circle(x-n):   ANCHOR : none ; y0    ; z0    ; DX : none ; DY : none ; DZ : none ; R0 : r
+#
+## Should coincide with .vtk file attributes
+#-----------------------------------------------------------------------------------------------------
+Standard flow geometry attributes = ANCHOR : 0.0 , 0.0 , 0.0 ; DX : 1.0 ; DY : 1.0 ; DZ : 1.0 ; R0 : 0.0
+
+#-----------------------------------------------------------------------------------------------------
+# Boundary conditions for standard geometry flow domains.
+#
+# Here are the various implementations in a library format:
+# ---------------------------------------------------------
+# 1.  Plane(z-n):   S0 : x0-tag ; S1 : x1-tag ; S2 : y0-tag ; S3 : y1-tag ; S4 : none   ; S5 : none
+# 2.  Plane(y-n):   S0 : x0-tag ; S1 : x1-tag ; S2 : none   ; S3 : none   ; S4 : z0-tag ; S5 : z1-tag
+# 3.  Plane(x-n):   S0 : none   ; S1 : none   ; S2 : y0-tag ; S3 : y1-tag ; S4 : z0-tag ; S5 : z1-tag
+# 4.  Cuboid:       S0 : x0-tag ; S1 : x1-tag ; S2 : y0-tag ; S3 : y1-tag ; S4 : z0-tag ; S5 : z1-tag
+# 5.  Cylinder(x):  S0 : r0-tag ; S1 : l0-tag ; S2 : l1-tag ; S3 : none   ; S4 : none   ; S5 : none
+# 6.  Cylinder(y):  S0 : r0-tag ; S1 : l0-tag ; S2 : l1-tag ; S3 : none   ; S4 : none   ; S5 : none
+# 7.  Cylinder(z):  S0 : r0-tag ; S1 : l0-tag ; S2 : l1-tag ; S3 : none   ; S4 : none   ; S5 : none
+# 8.  Sphere:       S0 : r0-tag ; S1 : none   ; S2 : none   ; S3 : none   ; S4 : none   ; S5 : none
+# 9.  Circle(z-n):  S0 : r0-tag ; S1 : none   ; S2 : none   ; S3 : none   ; S4 : none   ; S5 : none
+# 10: Circle(y-n):  S0 : r0-tag ; S1 : none   ; S2 : none   ; S3 : none   ; S4 : none   ; S5 : none
+# 11: Circle(x-n):  S0 : r0-tag ; S1 : none   ; S2 : none   ; S3 : none   ; S4 : none   ; S5 : none
+#
+# Notes:
+# ------
+# - Currently the toolkit applies the S0 tag to all boundaries of the flow domain.
+# - The following integers represent different types of boundary conditions:
+#   - 0 : Reset (FlowVC w/o interpolation)
+#   - 1 : Pushback (along a linear trajectory -- currently experiences issues for analytical fields)
+#   - 2 : Reflect (trajectory forms a right angle)
+#   - 3 : Periodic (currently only in +x)
+#   - 4 : Fix (on boundary)
+#-----------------------------------------------------------------------------------------------------
+Standard flow boundary tags = S0 : tag ; S1 : tag ; S2 : tag ; S3 : tag ; S4 : tag ; S5 : tag
+
+#-----------------------------------------------------------------------------------------------------
+# Cartesian grid domain for Lagrangian calculations.
+# [FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT, FLOAT]
+#
+# Note:
+# -----
+# - for FTLE etc calculations this is the seed point for all tracers
+# - for particle dynamics computations this is the grid used for Cartesian-grid based seeding
+#-----------------------------------------------------------------------------------------------------
+Standard Lagrangian geometry attributes = ANCHOR : 0.25 ; 0.25 ; 0.25 ; 0.75 ; 0.75 ; 0.75 ; DX : 0.01 ; DY : 0.01 ; DZ : 0.01
+
+#-----------------------------------------------------------------------------------------------------
+# Establishing the initial velocity of the particles
+#
+# Currently assumes the same velocity for every particle
+#-----------------------------------------------------------------------------------------------------
+Lagrangian initial velocity = 0.0 ; 0.0 ; 0.0
+
+#-----------------------------------------------------------------------------------------------------
+# Boolean Indicator to indicate if all particles are the same size.
+#
+# If False, a Float value must still be given for 'R0' in the 'Standard Lagrangian
+# geometry attributes' field but it will not be used.
+#-----------------------------------------------------------------------------------------------------
+Constant Particle Size = True
+
+#-----------------------------------------------------------------------------------------------------
+# Configuring particle injection parameters
+# [BOOLEAN, INT, FLOAT, INT, STRING]
+#
+## Used for particles released at multiple timesteps, set false to see advection of original particles
+## Particles injected at each node in .vtk mesh
+#-----------------------------------------------------------------------------------------------------
+Particle injection = True ; NUMBER : 1 ; START : 0.0 ; INTERVAL : 0.01
+
+#-----------------------------------------------------------------------------------------------------
+# 4. Miscellaneous features.
+#-----------------------------------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------------------------------
+# Placeholder to directly input all the fluid properties necessary for computation
+# [INT, FLOAT, FLOAT]
+#
+# ANALYTICAL - Parameter to pass into Fortran to tell the modules which analytical flow model to use
+#
+# Notes to set up the ANALYTICAL parameter:
+# -----------------------------------------
+# 0 : Experimental data sets (e.g. velocity fields obtained from CFD simulations)
+#
+# The following are analytical flow fields that have been pre-programmed in the module
+# analyticalFlowLibraryFT.f90 -- hence, any adjustments of parameters must be done in that module and
+# the Fortran modules will need to be recompiled. Future versions of the toolkit will include a
+# separate input file for parameters.
+#
+# 1 : Steady Double-Gyre
+# 2 : Unsteady Double-Gyre
+# 3 : Bickley Jet
+# 4 : Lamb-Osseen Vortex
+# 5 : Steady Arnold-Beltrami Childress
+# 6 : Unsteady Arnold-Beltrami Childress
+#
+# Notes:
+# ------
+# - For future development, add variable fields by entering "; FIELDNAME : fieldvalue" to this line
+# - Once added, edit the appropriate tag in "tracerInputModule.py" and reload module
+#-----------------------------------------------------------------------------------------------------
+Flow properties = ANALYTICAL : 0 ; VISCOSITY : 1.0 ; DENSITY : 1.0
+
+#-----------------------------------------------------------------------------------------------------
+# Placeholder to directly input all the Lagrangian particle properties necessary for computation
+# [FLOAT, FLOAT]
+#
+# Notes:
+# ------
+# - For future development, add variable fields by entering "; FIELDNAME : fieldvalue" to this line
+# - Once added, edit the appropriate tag in "tracerInputModule.py" and reload module
+#-----------------------------------------------------------------------------------------------------
+Particle properties = DENSITY : 1.0 ; DIFFUSION : 1.0e-6
+
+#-----------------------------------------------------------------------------------------------------
+# Flags to identify surface normals -- not yet implemented
+# [BOOLEAN, BOOLEAN, FLOAT]
+#-----------------------------------------------------------------------------------------------------
+Surface Normals = CONVERT : False ; FLIP : False ; SCALING : 1.0
+
+#-----------------------------------------------------------------------------------------------------
+# Input choice for VTK-based algorithm implementations for locating particles in a grid/mesh
+# This is the most important aspect of the computations for these vector field advection codes,
+# and comprises the primary reason for designing a VTK-based design of the modules
+# [STRING: True/False, STRING: True/False, STRING: True/False]
+#
+# Notes:
+# ------
+# - OCT : The simplest Octree based space-partitioning search algorithm (vtkCellLocator)
+# - TRE : Specialized space partitioning search (vtkCellTreeLocator) (fastest!)
+# - BSP : BSPTree partitioning search algorithm (vtkModifiedBSPTree)
+#-----------------------------------------------------------------------------------------------------
+Particle in cell locator = OCT : True ; TRE : False ; BSP : False
+
+#-----------------------------------------------------------------------------------------------------
+# Configuring particle pathline calculation parameters
+# [STRING: True/False, INT, INT, STRING: True/False]
+#
+# Notes:
+# ------
+# - True/False (first entry)  : flag to indicate whether particle pathlines will be computed and saved
+# - SUBSAMPLE (first entry)   : temporal subsamples, add once every N steps into the pathline
+# - SUBSAMPLE (second entry)  : particle subsamples, compute pathlines for every P particles
+# - DDGCALS                   : set True for discrete diff. geometry calculations per pathline
+#-----------------------------------------------------------------------------------------------------
+Particle pathlines = True ; SUBSAMPLE : 1 , 1 ; DDGCALC : True
+
+#-----------------------------------------------------------------------------------------------------
+# Configuring Lagrangian/tracer statistics and post-processing computation of residence time
+#
+# Notes:
+# ------
+# - MODE  : can be mapped/stream, if no residence time computation then enter none
+# - ROI   : enter here the name of the vtk file containing ROI, or a bounding box [X0,X1,Y0,Y1,Z0,Z1]
+# - INJECT: first entry is an input file from where inject tracers
+#           second entry specifies other properties for injection
+# - if second INJECT entry is a non-zero integer, inject after that many integration steps
+#-----------------------------------------------------------------------------------------------------
+Residence time module setup = MODE : mapped ; ROI : none ; INJECT : none ; 0
+
+#-----------------------------------------------------------------------------------------------------
+# Configuring Lagrangian/tracer statistics and post-processing computation of residence time
+#
+# Notes:
+# ------
+# - MODE  : can be mapped/stream, if no residence time computation then enter none
+# - ROI   : enter here the name of the vtk file containing ROI, or a bounding box [X0,X1,Y0,Y1,Z0,Z1]
+# - INJECT: first entry is an input file from where inject tracers
+#           second entry specifies other properties for injection
+# - if second INJECT entry is a non-zero integer, inject after that many integration steps
+#-----------------------------------------------------------------------------------------------------
+Infectious disease module setup = MODE : mapped ; ROI : none ; INJECT : none ; 0
+
+#-----------------------------------------------------------------------------------------------------
+# END OF INPUT FILE
+#-----------------------------------------------------------------------------------------------------

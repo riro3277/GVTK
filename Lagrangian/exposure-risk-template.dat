@@ -1,0 +1,148 @@
+#-------------------------------------------------------------------------------
+# ABOUT:
+# ------
+# This is an example of the ASCII form user-input for calculating exposure risk
+# for a number of subjects given a pre-generated series of particle files.
+#
+# INSTRUCTIONS:
+# -------------
+# - Every line starting with a '#' is a comment and will be ignored by the code.
+# - Appropriate parameters for each field (identified by a human-readable variable tag)
+#   has to be entered after the '=' sign for each tag.
+# - The int/float/string/bool data format has been indicated for each variable in the documentation
+# - Between each TAG variable and values  - place a ":"
+# - To separate TAG variables             - place a ";"
+# - To separate multiple values for a TAG - place a ","
+# - For TAGs that have a vector value     - place [] around the values
+#
+# Authors:      Joseph Wilson
+# Institution:  University of Colorado, Boulder
+# Latest edits: May 2021
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# If you are performing a series of exposure index calculations you can use this
+# variational parameters field by setting changing False to True. You can use
+# any number of variational parameters by separating each set by a ;
+#
+# For an example, to use the param1/entry1 pair:
+#     everywhere that entry1 would appear in any field below (except Grid
+#     Settings and File Step Size) use param1 instead.
+#
+#     Emitting subjects could be replaced with # in the field. Then in
+#     Variational Parameters you could have the pair:
+#         # : 1
+#     And also put # in any field that corresponds to this parameter
+#
+# The purpose of this field is that between numerous cases, the only location
+# changes need to be made is in this Variational Parameters line, and all other
+# fields can remain the same between .dat input files.
+#-------------------------------------------------------------------------------
+Variational parameters = False ; param1 : entry1 ; param2 : entry2
+
+#-------------------------------------------------------------------------------
+# Index (int) of emitting subject(s) in Subject head centers and Subject
+# orientations. Indexing starts at 0.
+#-------------------------------------------------------------------------------
+Emitting subjects = 1
+
+#-------------------------------------------------------------------------------
+# Index of all exposed subjects (int). Be consistent with emitting subjects,
+# head centers, and orientations.
+#-------------------------------------------------------------------------------
+Exposed subjects = 0 ; 2 ; 3 ; 4
+
+#-------------------------------------------------------------------------------
+# Cartesian location of center of head (float array).
+#-------------------------------------------------------------------------------
+Subject head centers = [0.0, 0.0, 0.0] ; [1.0, 1.0, 1.0] ; [2.0, 2.0, 2.0] ; [3.0, 3.0, 3.0] ; [4.0, 4.0, 4.0]
+
+#-------------------------------------------------------------------------------
+# If first TAG is True the exposure zones will be modeled as a conical shape
+# with a rounded base, and the orientation is the centerline of this structure.
+# If the first TAG is False, the exposure zones will be modeled as spheres
+# that are concentric with the head center.
+#
+# Orientations parallel with a primary axis can be indicated with a +x, -x, +y,
+# -y, +z, or -z. They can also be indicated with a float array.
+#-------------------------------------------------------------------------------
+Subject orientations = True; +x ; -y ; +z ; [1.0, 0.5, 0.0]
+
+#-------------------------------------------------------------------------------
+# Path from active directory to the directory holding the .vtk files. Must end
+# with a /
+#-------------------------------------------------------------------------------
+Results directory = path/to/files/
+
+#-------------------------------------------------------------------------------
+# Repeated name of particle file series. Code assumes that differentiating steps
+# come at the end of the series name.
+#-------------------------------------------------------------------------------
+Particle file series name = file-series-name_
+
+#-------------------------------------------------------------------------------
+# File extension of the particle series.
+#-------------------------------------------------------------------------------
+Particle file extension = .vtk
+
+#-------------------------------------------------------------------------------
+# Step size between particle files in series (int).
+#-------------------------------------------------------------------------------
+File step size = 10
+
+#-------------------------------------------------------------------------------
+# Float value of distance between center of head and surface of face/head.
+#-------------------------------------------------------------------------------
+Subject head radius = 0.1
+
+#-------------------------------------------------------------------------------
+# Tracks the viral decay. If LINEAR is true, DECAY RATE (float) is the slope of
+# the line representing viability as a function of time. If LINEAR is False,
+# model assumes an exponential decay in which case DECAY RATE is the half life.
+# dT (float) is the time step in between each particle file.
+#-------------------------------------------------------------------------------
+Viability = LINEAR : False ; DECAY RATE : 10.0 ; dT : 0.5
+
+#-------------------------------------------------------------------------------
+# Number of exposure zones (int) and (if modeling conical exposure zones) the
+# angle (in degrees as a float) between the orientation vector and the side of
+# the exposure zone.
+#-------------------------------------------------------------------------------
+Exposure zones =  NUMBER OF ZONES : 4 ; ANGLE : 45.0
+
+#-------------------------------------------------------------------------------
+# File name of where exposure index is recorded. File must be a csv, currently
+# the codes uses the pandas module to record data in a csv file. Does not need
+# to be created beforehand.
+#-------------------------------------------------------------------------------
+Exposure risk filename = path/to/list.csv
+
+#-------------------------------------------------------------------------------
+# Used to differentiate between different case calculations in the event of
+# running multiple cases (such as when Variation Parameters might be used).
+# At least one header/entry pair must be included. headers are the column names
+# in the csv file and entry is the column entry for this case input. Any number
+# of header/entry pairs can be listed here.
+#-------------------------------------------------------------------------------
+Exposure risk filename case identifiers = header1 : entry1 ; header2 : entry2
+
+#-------------------------------------------------------------------------------
+# A grid animation breaks the domain into a 2D rectangular grid and counts all
+# particles in the resulting bin. Then this is output as a series of png images
+# showing a heatmap of the particle distribution.
+#-------------------------------------------------------------------------------
+Grid animation filename = output/path/to/series-name_
+
+#-------------------------------------------------------------------------------
+# Settings for the grid heatmap. Setting GENERATE to False disables the output
+# and calculation of the heatmaps.
+#-------------------------------------------------------------------------------
+Grid settings = GENERATE : True ; RESOLUTION : 0.2 ; X MIN/MAX : 0.0, 4.0 ; Y MIN/MAX : 0.0, 4.0
+
+#-------------------------------------------------------------------------------
+# An image of the 2D representation of the domain and the subjects can be used
+# as a background for the heatmap. Doing so makes the heatmap more informative.
+# If the GENERATE parameter in Grid setting is set to false then inputs must
+# still be given for this line.
+#-------------------------------------------------------------------------------
+Grid background = INCLUDE : True ; LOCATION : path/to/image.png

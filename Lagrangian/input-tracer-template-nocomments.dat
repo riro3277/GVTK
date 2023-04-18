@@ -1,0 +1,63 @@
+Problem dimension = 2
+
+Debug mode = False
+
+Project directory = default
+
+Flow data directory = none
+
+Flow data file tag = none
+
+Flow data field name = f_11
+
+Tracer input file = file.vtk
+
+Discrete element input file = ENSEMBLE : particles.dat ; TRANSFORM : transformdata.dat
+
+Lagrangian field output file = file.vtk
+
+Lagrangian tracer output file = file.vtk
+
+Data file index = START : 1 ; STOP : 10 ; DELTA : 1 ; COUNT : 50
+
+Data file timing = START : 0.0 ; STOP : 1.0 ; DELTA : 0.01 ; PERIODIC : True
+
+Output file index = START : 0 ; STOP : 9 ; DELTA : 1
+
+Output file timing = START : 0.0 ; INTERVAL : 0.01
+
+Simulation timing = START : 0.0 ; STOP : 0.0 ; DELTA : 0.01
+
+Integration setup = SCHEME : feu
+
+Fixed mesh = True
+
+Lagrangian module set up = FWDTLE : False ; BWDFTLE : False ; STRETCH : False ; STRAIN : False
+
+Lagrangian kinematics unit vectors = V1 : 1.0 0.0 0.0 ; V2 : 0.0 1.0 0.0 ; V3 : 0.0 0.0 1.0
+
+Standard flow geometry attributes = ANCHOR : 0.0 , 0.0 , 0.0 ; DX : 1.0 ; DY : 1.0 ; DZ : 1.0 ; R0 : 0.0
+
+Standard boundary tags = S0 : tag ; S1 : tag ; S2 : tag ; S3 : tag ; S4 : tag ; S5 : tag
+
+Standard Lagrangian geometry attributes = ANCHOR : 0.25 ; 0.25 ; 0.25 ; 0.75 ; 0.75 ; 0.75 ; DX : 0.01 ; DY : 0.01 ; DZ : 0.01
+
+Lagrangian initial velocity = 0.0 ; 0.0 ; 0.0
+
+Constant Particle Size = True
+
+Particle injection = True ; NUMBER : 1 ; START : 0.0 ; INTERVAL : 0.01
+
+Flow properties = ANALYTICAL : 0 ; VISCOSITY : 1.0 ; DENSITY : 1.0
+
+Particle properties = DENSITY : 1.0 ; DIFFUSION : 1.0e-6
+
+Surface Normals = CONVERT : False ; FLIP : False ; SCALING : 1.0
+
+Particle in cell locator = OCT : True ; TRE : False ; BSP : False
+
+Particle pathlines = True ; SUBSAMPLE : 1 , 1 ; DDGCALC : True
+
+Residence time module setup = MODE : mapped ; ROI : none ; INJECT : none ; 0
+
+Infectious disease module setup = MODE : mapped ; ROI : none ; INJECT : none ; 0
