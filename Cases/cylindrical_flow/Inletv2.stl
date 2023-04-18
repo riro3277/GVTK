@@ -1,0 +1,50 @@
+solid 
+facet normal 0 -0 -1
+outer loop
+vertex 0.1093760207 0.1543313861 10
+vertex 0.5805693269 1.913880706 10
+vertex 1.662939191 1.11114049 10
+
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 0.1093760207 0.1543313861 10
+vertex 0.1960342824 -1.990369439 10
+vertex -1.913880706 -0.5805693269 10
+
+endloop
+endfacet
+facet normal 0 -0 -1
+outer loop
+vertex -1.913880706 -0.5805693269 10
+vertex -1.847759008 0.7653668523 10
+vertex 0.1093760207 0.1543313861 10
+
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 1.978353024 -0.2934609354 10
+vertex 0.1960342824 -1.990369439 10
+vertex 0.1093760207 0.1543313861 10
+
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 0.5805693269 1.913880706 10
+vertex 0.1093760207 0.1543313861 10
+vertex -1.847759008 0.7653668523 10
+
+endloop
+endfacet
+facet normal 0 -0 -1
+outer loop
+vertex 0.1093760207 0.1543313861 10
+vertex 1.662939191 1.11114049 10
+vertex 1.978353024 -0.2934609354 10
+
+endloop
+endfacet
+endsolid

@@ -1,0 +1,10 @@
+# vtk DataFile Version 5.1
+vtk output
+BINARY
+DATASET POLYDATA
+POINTS 6 float
+¾ÍýÍ?žiAµt=ÙÃ¿rh¼A0¿Y_G¿[JÌA¼ê?ƒ;f:lùAt:¿h!‹>Þ.ÑA¡>õG¼?—,IAC
+POINT_DATA 6
+FIELD FieldData 1
+Velocity 3 6 double
+¿ù«‘Ú¿á†ÆCÖìµ¿Û"4‚—Š‡?ìÎÍÎ ?¿Œ7Oy¾ý¿Àdå1œ?ðÒ†dZD•¿ð!Ll}…l¿ÕY]Dú»}¿›‡éRl?ðâèµœ¿ÇvÁ¤ø{¿ÚŸ±n#–?¿ízF)‘Þ®¿ÅN\ø~d¿ø>Ãñ‚Ìú?âÆl¼³óì¿Ùj¬tÄç
