@@ -8,3 +8,5 @@ pages:
   - python3 test.py
   only:
   - main
+  environment:
+   name: staging
