@@ -56,6 +56,8 @@ class SimInputs:
 
                     tempRoot = lineDict[1].strip()
                     if tempRoot != 'default': self.m_RootPath = tempRoot
+                    if sys.argv[1].strip() == "test":
+                        print(os.path.dirname(os.path.abspath(__file__)))
 
                 # checked
                 elif lineDict[0].strip() == 'Problem dimension':
