@@ -5,8 +5,7 @@ pages:
   stage: deploy
  
   script:
-  - python3 test.py
+  - python3 /Citest/citest.py
   only:
   - main
-  environment:
-   name: staging
+
