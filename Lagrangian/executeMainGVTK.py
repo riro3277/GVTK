@@ -34,7 +34,7 @@ if len(sys.argv) != 3:
     print("Modes of Operation:")
     print("\n", "Collision", "\n", "Tracer", "\n", "Diffuse", "\n", "Inertial", "\n", "Viral", "\n", "Test", "\n")
     print("For test mode, give location of -input-tracer-analytical-standard.dat- as the first argument and -test- as the second argument")
-    print("-input-tracer-analytical-standard.dat- is located in the GVTK code base")
+    print("-input-tracer-analytical-standard.dat- is located in the GVTK code base, must change paths to ./Cases/cylindrical_flow/ is located on your local machine")
     sys.exit("If not testing, give location of input file as first argument and mode as second arguemnt ")
 else:
     inputFile   = sys.argv[1].strip()

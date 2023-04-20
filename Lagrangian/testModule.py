@@ -4,11 +4,11 @@ import shutil
 from datetime import date
 
 class Testing():
-    def __init__(self, RootDir):
-        self.RootDir = RootDir
+    def __init__(self):
+        self.RootDir = os.path.dirname(os.path.abspath(__file__)) + "/Cases/cylindrical_flow/"
     def Compare(self):
-        self.StandardRoot = os.path.dirname(os.path.abspath(__file__)) + '/'
-        StandardResults = self.StandardRoot + 'StandardFile0.txt'
+        self.StandardRoot = os.path.dirname(os.path.abspath(__file__)) + "/Lagrangian/"
+        StandardResults = self.StandardRoot + 'StandardFile1.txt'
         TestResults = self.RootDir + 'TestFile0.txt'
 
         StandardFile = open(StandardResults,'r')
@@ -111,6 +111,6 @@ class Testing():
 
 
 if __name__ == "__main__":
-    case = Testing('/mnt/d/lagrangiantest/cylindrical_flow/')
+    case = Testing()
     case.Compare()
     case.Documentation()
