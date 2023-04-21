@@ -9,4 +9,4 @@ pages:
   - pip install -r requirements.txt
   - python3 testv2.py
   only:
-  - main
+  - test
