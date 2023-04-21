@@ -11,7 +11,7 @@ class Testing():
 
     def Compare(self):
 
-        StandardResults = self.StandardRoot + '/Lagrangian/StandardFiles/StandardFile0.txt'
+        StandardResults = self.StandardRoot + '/Lagrangian/StandardFiles/StandardFile1.txt'
         TestResults = self.RootDir + 'TestFiles/TestFile0.txt'
 
         StandardFile = open(StandardResults,'r')
@@ -109,7 +109,9 @@ class Testing():
 
             else:
                 fout.write(line)
-        shutil.copy(TestDoc, self.StandardRoot + '/Docs/RegressionSummary.tex')
+        shutil.copyfile(TestDoc, self.StandardRoot + '/Docs/RegressionSummary.tex')
+        if self.Status == "FAILED":
+            return(1/0)
 
 
 
