@@ -4,12 +4,15 @@ import shutil
 from datetime import date
 
 class Testing():
-    def __init__(self):
-        self.RootDir = os.path.dirname(os.path.abspath(__file__)) + "/Cases/cylindrical_flow/"
+    def __init__(self, CylDir, StandardDir):
+        print("Im Right Heere", CylDir, StandardDir)
+        self.StandardRoot = StandardDir
+        self.RootDir = CylDir
+
     def Compare(self):
-        self.StandardRoot = os.path.dirname(os.path.abspath(__file__)) + "/Lagrangian/"
-        StandardResults = self.StandardRoot + 'StandardFile1.txt'
-        TestResults = self.RootDir + 'TestFile0.txt'
+
+        StandardResults = self.StandardRoot + '/Lagrangian/StandardFiles/StandardFile0.txt'
+        TestResults = self.RootDir + 'TestFiles/TestFile0.txt'
 
         StandardFile = open(StandardResults,'r')
         TestFile = open(TestResults,'r')
@@ -72,7 +75,7 @@ class Testing():
 
     def Documentation(self):
         TestDoc = self.RootDir + 'RegressionSummary.tex'
-        TempDoc = self.StandardRoot + 'TestingReportTemplate.tex'
+        TempDoc = self.StandardRoot + '/Lagrangian/TestingReportTemplate.tex'
         today = date.today()
         d1 = today.strftime("%m/%d/%Y")
         print("Regression Test Status", self.Status)
@@ -106,11 +109,16 @@ class Testing():
 
             else:
                 fout.write(line)
+        shutil.copy(TestDoc, self.StandardRoot + '/Docs/RegressionSummary.tex')
 
 
 
 
 if __name__ == "__main__":
-    case = Testing()
+    baseDir = os.path.dirname(os.path.abspath(__file__))
+    TestDir = baseDir + "/Cases/cylindrical_flow/"
+    StandDir = baseDir + "/"
+    print(baseDir)
+    case = Testing(TestDir, StandDir)
     case.Compare()
     case.Documentation()

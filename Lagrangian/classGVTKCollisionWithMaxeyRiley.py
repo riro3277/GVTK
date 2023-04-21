@@ -29,7 +29,7 @@ class GVTKCollision(GVTKProblem):
         super().__init__(a_InputData,a_DebugMode)
         self.m_LagrangianData = None
         self.m_GridData       = None
-        self.Mode = sys.argv[2]
+        self.Mode = sys.argv[1]
 
     @property
     def numParticles(self):
@@ -74,11 +74,14 @@ class GVTKCollision(GVTKProblem):
         #-----------------------------------------------------------------------
         # start time counter
         #-----------------------------------------------------------------------
+
+        #Clears and creates Test Files for Regression Testings
         if self.Mode == 'test':
             self.Root_dir = self.m_InputData.getRootPath()
+            testFilesDir = self.Root_dir + "/TestFiles/"
             for p in range(self.numParticles):
-                if os.path.isfile(self.Root_dir + 'TestFile' + str(p) + '.txt') == True:
-                    with open(self.Root_dir + 'TestFile' + str(p) + '.txt', 'w'):
+                if os.path.isfile(testFilesDir + 'TestFile' + str(p) + '.txt') == True:
+                    with open(testFilesDir + 'TestFile' + str(p) + '.txt', 'w'):
                         pass
 
         timeIndex    = 0
@@ -498,11 +501,14 @@ class GVTKCollision(GVTKProblem):
             #----------------------------------------------------------------------
             if timeIndex%self.m_InputData.m_WriteInterval == 0:
                 self.m_LagrangianData.writeData(self.m_InputData.getTracerOutputFile(a_ID1=0, a_ID2=timeIndex))
+            # if self.Mode == "test":
+            #      baseDir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            #      sys.exit(print("Here", baseDir, self.Root_dir))
+            #      case = Testing(baseDir, self.Root_dir)
+            #      case.Compare()
+            #      case.Documentation()
 
-            if self.Mode == "test":
-                 case = Testing(self.Root_dir)
-                 case.Compare()
-                 case.Documentation()
+
             #------------------------------------------------
             # STEP 9: update time indices and simulation time
             #------------------------------------------------
@@ -511,7 +517,13 @@ class GVTKCollision(GVTKProblem):
             timeElapsed1 += t3 - t2
             print('elapsed time in particle tracking/collision till last loop: ', timeElapsed1)
         print('Elapsed time in particle tracking/collision: ', timeElapsed1)
-
+        #Runs regression test module for doumentation and test to standard file comparison
+        if self.Mode == "test":
+             baseDir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+             case = Testing(self.Root_dir, baseDir)
+             case.Compare()
+             case.Documentation()
+            #-------------------------
     #------collision function starts here--------#
     def sdfCollision(self, simTime, tWin_0, tWin_1, gradVel, boundaryCondition, a_Locator, a_DataSync=True, a_PolygonalCells=False):
 
@@ -731,13 +743,19 @@ class GVTKCollision(GVTKProblem):
         #--------------------------------
         # set new xyz for  point in loop
         #--------------------------------
+
+        #--------------------------------
+        # Regression Test File Creation
+        #--------------------------------
             if self.Mode == 'test':
-                Root_dir = self.m_InputData.getRootPath()
+
+                #Root_dir is the cylindrical_flow folder
+                Root_dir = self.Root_dir + "/TestFiles/"
 
                 Standard_File = open(Root_dir+'TestFile' +  str(p) + '.txt', 'a')
 
 
-
+                #Writes pos, vel, and particle forces to test files. Switch Root_Dir to Standard Files Dir in Lagrangian folder to recreate standard files
                 Standard_File.write('t:' + str(simTime) + ' Position:')
                 for i in range(len(posP)):
                     Standard_File.write(str(posP[i]) + ",")

@@ -44,7 +44,9 @@ class SimInputs:
     def readInputFile(self):
 
         inputFileObj = open(self.m_InputFile)
-
+        if sys.argv[1].strip() == "test":
+            baseDir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            projDir = baseDir + "/Cases/cylindrical_flow/"
         for line in inputFileObj:
 
             if not line.startswith('#'):
@@ -56,8 +58,9 @@ class SimInputs:
 
                     tempRoot = lineDict[1].strip()
                     if tempRoot != 'default': self.m_RootPath = tempRoot
+
                     if sys.argv[1].strip() == "test":
-                        print(os.path.dirname(os.path.abspath(__file__)))
+                        self.m_RootPath = projDir
 
                 # checked
                 elif lineDict[0].strip() == 'Problem dimension':
@@ -346,7 +349,7 @@ class SimInputs:
                     self.m_ResumeSimulation = lineDict[1].strip().lower() == 'true'
 
         inputFileObj.close()
-
+        
     def getTracerInput(self):
         return self.m_TracerInput
 
