@@ -1,4 +1,4 @@
-pages:
+run_branch:
 
   image: python:3.8
 
