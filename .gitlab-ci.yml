@@ -1,8 +1,11 @@
 pages:
 
   image: python:3.8
- 
+
+  stage: deploy
+
   script:
   - python3 test.py
+  
   only:
   - test
