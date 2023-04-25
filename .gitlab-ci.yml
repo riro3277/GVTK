@@ -3,8 +3,6 @@ pages:
   image: python:3.8
  
   script:
-  - python -m pip install --upgrade pip
-  - pip install -r requirements.txt
-  - python3 testv2.py
+  - python3 test.py
   only:
   - test
