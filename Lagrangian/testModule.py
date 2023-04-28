@@ -2,6 +2,8 @@ import os
 import math
 import shutil
 from datetime import datetime
+import numpy as np
+import matplotlib.pyplot as plt
 
 class Testing():
     def __init__(self, CylDir, StandardDir):
@@ -12,7 +14,7 @@ class Testing():
     def Compare(self):
 
         StandardResults = self.StandardRoot + '/Lagrangian/StandardFiles/StandardFile0.txt'
-        TestResults = self.RootDir + 'TestFiles/TestFile0.txt'
+        TestResults = self.RootDir + 'TestFiles/TestFile1.txt'
 
         StandardFile = open(StandardResults,'r')
         TestFile = open(TestResults,'r')
@@ -27,7 +29,12 @@ class Testing():
         self.PositionErr =  0
         self.TotalError = 0
 
-
+        xtest = []
+        ytest =[]
+        ztest = []
+        xstd = []
+        ystd = []
+        zstd = []
 
         for i in range(len(TestFile_lines)):
             STDvals = StandardFile_lines[i].split(" ")
@@ -65,12 +72,26 @@ class Testing():
 
             elif STDType == 'Position' and STDType == TType:
                 self.PositionErr += error
+                xstd.append(STDVEC[0])
+                ystd.append(STDVEC[1])
+                zstd.append(STDVEC[2])
+                xtest.append(TVEC[0])
+                ytest.append(TVEC[1])
+                ztest.append(TVEC[2])
 
 
         if self.TotalError > 1e-3:
             self.Status = "FAILED"
         else:
             self.Status = "PASSED"
+
+        #Plot postition of test and standard results
+        ax = plt.axes(projection='3d')
+        ax.scatter3D(xstd, ystd, zstd, c = 'red', label = 'Standard Results')
+        ax.scatter3D(xtest, ytest, ztest, c = 'green', label = 'Test Results')
+        plt.legend()
+        plt.title("Particle Position of Standard and Test Results")
+        plt.savefig(self.StandardRoot + '/Docs/Position.png', dpi =300)
 
 
     def Documentation(self):

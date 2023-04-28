@@ -4,11 +4,11 @@
 \begin{document}
 
 \section{Regression Test of GVTK}
-Date: 04/27/2023 23:11:08
+Date: 04/28/2023 16:26:17
 
 \vspace{5pt}
 
-\noindent Regression Test Status: PASSED
+\noindent Regression Test Status: FAILED
 
 \vspace{5pt}
 
@@ -24,21 +24,31 @@ are changing most drastically due to the updates to help guide debugging or phys
 \noindent Summary of Summed Errors:
 \vspace{5pt}
 
-Velocity Error: 0.0
+Velocity Error: 15295.338876598356
 
-Position Error: 0.0
+Position Error: 1966.5533145914744
 
-Drag Error: 0.0
+Drag Error: 17.40170790614004
 
-ShearGradLift Error: 0.0
+ShearGradLift Error: 21.914155480778195
 
 Body Force Error: 0.0
 
 \vspace{5pt}
 
-\noindent Summary/Actions: No action needed, regression test passed and it is safe to push new version to GitLab
+\noindent Summary/Actions: Regression test has failed meaning there are drastic changes in the results of the code. 
+If there is supposed to be drastic changes, please make sure you have conferred with the team that this is correct and then update the Standard File in gitlab by running the input-tracer-analytical-standard.dat for the cylindrical flow dataset.
+Run the regression test again with the new standard files to make sure it passes.
 
 \vspace{5pt}
 
 \noindent Please report any differences. If making updates that are non-physics based, this test MUST BE PASSED before any commits to gitlab!
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=1.0\textwidth]{Position.png}
+\caption{\textit{Position of the particle for both the test and standard results}}
+\label{fig:postion}
+\end{figure}
+
 \end{document}
