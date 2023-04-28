@@ -1,7 +1,7 @@
 import os
 import math
 import shutil
-from datetime import date
+from datetime import datetime
 
 class Testing():
     def __init__(self, CylDir, StandardDir):
@@ -76,8 +76,8 @@ class Testing():
     def Documentation(self):
         TestDoc = self.RootDir + 'RegressionSummary.tex'
         TempDoc = self.StandardRoot + '/Lagrangian/TestingReportTemplate.tex'
-        today = date.today()
-        d1 = today.strftime("%m/%d/%Y")
+        today = datetime.now()
+        d1 = today.strftime("%m/%d/%Y %H:%M:%S")
         print("Regression Test Status:", self.Status)
         print("Please see summary within Docs folder for more information")
         shutil.copyfile(TempDoc, TestDoc)
