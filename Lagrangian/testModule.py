@@ -4,7 +4,7 @@ import shutil
 from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
-from pdflatex import PDFLaTeX
+
 
 class Testing():
     def __init__(self, CylDir, StandardDir):
