@@ -14,7 +14,7 @@ class Testing():
     def Compare(self):
 
         StandardResults = self.StandardRoot + '/Lagrangian/StandardFiles/StandardFile0.txt'
-        TestResults = self.RootDir + 'TestFiles/TestFile1.txt'
+        TestResults = self.RootDir + 'TestFiles/TestFile0.txt'
 
         StandardFile = open(StandardResults,'r')
         TestFile = open(TestResults,'r')
