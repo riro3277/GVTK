@@ -101,6 +101,8 @@ class Testing():
         d1 = today.strftime("%m/%d/%Y %H:%M:%S")
         print("Regression Test Status:", self.Status)
         print("Please see summary within Docs folder for more information")
+        if self.Status == "FAILED":
+            print("Divide by zero error is for GitLab CI, supposed to be there")
         shutil.copyfile(TempDoc, TestDoc)
         fin = open(TempDoc, "rt")
 
