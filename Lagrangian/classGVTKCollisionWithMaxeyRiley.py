@@ -755,7 +755,7 @@ class GVTKCollision(GVTKProblem):
                 Standard_File = open(Root_dir+'TestFile' +  str(p) + '.txt', 'a')
 
 
-                #Writes pos, vel, and particle forces to test files. Switch Root_Dir to Standard Files Dir in Lagrangian folder to recreate standard files
+                #Writes pos, vel, and particle forces to test files in cylinder_flow folder
                 Standard_File.write('t:' + str(simTime) + ' Position:')
                 for i in range(len(posP)):
                     Standard_File.write(str(posP[i]) + ",")

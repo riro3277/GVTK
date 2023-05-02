@@ -30,11 +30,12 @@ except ImportError:
 #-----------------------------
 # parse command-line arguments
 #-----------------------------
+#Running in test mode automatically passes the input-tracer-analytical-standard.dat as the input file to run the cylindrical_flow simulation
 if len(sys.argv) == 2:
     if sys.argv[1].strip() == "test":
         executeMode = sys.argv[1].strip()
         inputFile = os.path.dirname(os.path.abspath(__file__)) +"/input-tracer-analytical-standard.dat"
-
+#General message to show possible modes of operation and how to run the regression test
 elif len(sys.argv) != 3:
     print("Modes of Operation:")
     print("\n", "Collision", "\n", "Tracer", "\n", "Diffuse", "\n", "Inertial", "\n", "Viral", "\n", "Test", "\n")
