@@ -12,7 +12,7 @@ import numpy as np
 import time
 
 from numpy import linalg as la
-
+from numba import jit
 try:
     from classGVTKGrid import *
     from classGVTKLagrangianData import *
@@ -481,11 +481,11 @@ class GVTKCollision(GVTKProblem):
             InitialVelocity[:,0] = float(self.m_InputData.m_InitialVelocity['u'])
             InitialVelocity[:,1] = float(self.m_InputData.m_InitialVelocity['v'])
             InitialVelocity[:,2] = float(self.m_InputData.m_InitialVelocity['w'])
-
             #Output initial positions of particles
-            if simTime == self.m_InputData.getSimulationStartTime() or self.m_ResumeSimulation:
-                self.m_LagrangianData.addVectorData('Velocity', InitialVelocity)
-                self.m_ResumeSimulation = False
+            if self.m_InputData.m_InitialVelocityStatus == "True":
+                if simTime == self.m_InputData.getSimulationStartTime() or self.m_ResumeSimulation:
+                    self.m_LagrangianData.addVectorData('Velocity', InitialVelocity)
+                    self.m_ResumeSimulation = False
             #----------------------------------------------------------------
             # STEP 7: now proceed with integration of each inertial particle
             #----------------------------------------------------------------
@@ -524,7 +524,9 @@ class GVTKCollision(GVTKProblem):
              case.Compare()
              case.Documentation()
             #-------------------------
+
     #------collision function starts here--------#
+    # @jit(nopython=True)
     def sdfCollision(self, simTime, tWin_0, tWin_1, gradVel, boundaryCondition, a_Locator, a_DataSync=True, a_PolygonalCells=False):
 
         dist            = self.m_GridData.extractDataArray('sdf')
@@ -558,8 +560,22 @@ class GVTKCollision(GVTKProblem):
         Tuforce = 0.0
         Tbody = 0.0
         c = 0.0
+
         for p in range(self.numParticles):
             posP         = self.m_LagrangianData.getX(p) # particle position
+
+            if self.m_InputData.m_InitialVelocityStatus == "False":
+                if simTime == self.m_InputData.getSimulationStartTime():
+                        if a_PolygonalCells == True:
+                            v           = self.m_GridData.gridInterpolateAveraging(posP, 'v0')
+                        else:
+                            v           = self.m_GridData.gridInterpolateNodalBasis(posP, 'v0')
+                        InitialVelocity = np.zeros((self.numParticles, 3))
+                        InitialVelocity[:,0] = float(v[0])
+                        InitialVelocity[:,1] = float(v[1])
+                        InitialVelocity[:,2] = float(v[2])
+
+                        self.m_LagrangianData.addVectorData('Velocity', InitialVelocity)
             v_i          = np.array(self.m_LagrangianData.getVectorData(a_ArrayName='Velocity', a_DataID=p)) # particle velocity
             # print('velocityp=', v_i)
             # sys.exit()
@@ -585,6 +601,8 @@ class GVTKCollision(GVTKProblem):
                     delv_delT[0]  = (vNext[0] - v[0])/data_DT
                     delv_delT[1]  = (vNext[1] - v[1])/data_DT
                     delv_delT[2]  = (vNext[2] - v[2])/data_DT
+
+
 
             elif a_DataSync == True:
                 if a_PolygonalCells == True:

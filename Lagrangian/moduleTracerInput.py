@@ -298,9 +298,10 @@ class SimInputs:
                 elif lineDict[0].strip() == 'Lagrangian initial velocity':
 
                     tempList = lineDict[1].strip().split(';')
-                    self.m_InitialVelocity['u'] = tempList[0].strip()
-                    self.m_InitialVelocity['v'] = tempList[1].strip()
-                    self.m_InitialVelocity['w'] = tempList[2].strip()
+                    self.m_InitialVelocityStatus = tempList[0].strip()
+                    self.m_InitialVelocity['u'] = tempList[1].strip()
+                    self.m_InitialVelocity['v'] = tempList[2].strip()
+                    self.m_InitialVelocity['w'] = tempList[3].strip()
 
                 elif lineDict[0].strip() == 'Particle Size':
 
@@ -349,7 +350,7 @@ class SimInputs:
                     self.m_ResumeSimulation = lineDict[1].strip().lower() == 'true'
 
         inputFileObj.close()
-        
+
     def getTracerInput(self):
         return self.m_TracerInput
 

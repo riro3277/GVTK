@@ -46,7 +46,7 @@ Standard boundary tags = S0 : tag ; S1 : tag ; S2 : tag ; S3 : tag ; S4 : tag ; 
 
 Standard Lagrangian geometry attributes = ANCHOR : 0.25 ; 0.25 ; 0.25 ; 0.75 ; 0.75 ; 0.75 ; DX : 0.01 ; DY : 0.01 ; DZ : 0.01 ; R0 : 0.25
 
-Lagrangian initial velocity = 0.0 ; 0.0 ; 0.0
+Lagrangian initial velocity = False; 5 ; 6 ; 7
 
 Gravity Vector = 0.0 ; 0.0 ; -9806.65
 
