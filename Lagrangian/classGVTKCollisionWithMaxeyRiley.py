@@ -12,7 +12,7 @@ import numpy as np
 import time
 
 from numpy import linalg as la
-from numba import jit
+
 try:
     from classGVTKGrid import *
     from classGVTKLagrangianData import *
@@ -94,6 +94,7 @@ class GVTKCollision(GVTKProblem):
         tWin_0    = timeWindowDict['T_Low'][0]
         tWin_1    = timeWindowDict['T_Up'][0]
         data_DT   = self.m_InputData.getFlowDataTimeStep()
+        self.Shannon_Entropy = self.m_InputData.getShannonEntropy()
         isSingleStageIntegration = True # set true for feu and false for for rk4
 
         #-----------------------------------------------------------------------
@@ -524,6 +525,8 @@ class GVTKCollision(GVTKProblem):
              case.Compare()
              case.Documentation()
             #-------------------------
+        if self.Shannon_Entropy == True:
+            print(self.boxCount)
 
     #------collision function starts here--------#
     # @jit(nopython=True)
@@ -798,6 +801,67 @@ class GVTKCollision(GVTKProblem):
                 for i in range(len(bodyForce)):
                     Standard_File.write(str(bodyForce[i]) + ",")
                 Standard_File.write('\n')
+
+            if self.Shannon_Entropy == True:
+                Bounds = self.m_InputData.getEntropyBounds()
+
+                Res = self.m_InputData.getEntropyRes()
+
+                XRes = Res[0]
+                YRes = Res[1]
+                ZRes = Res[2]
+
+                numBoxes = XRes * ZRes * YRes
+
+                X0 = Bounds[0][0]
+                X1 = Bounds[0][1]
+                Y0 = Bounds[1][0]
+
+                Y1 = Bounds[1][1]
+                Z0 = Bounds[2][0]
+                Z1 = Bounds[2][1]
+
+                XRange = X1 - X0
+                dx = XRange / XRes
+
+                YRange = Y1 - Y0
+                dy = YRange / YRes
+
+                ZRange = Z1 - Z0
+                dz = ZRange / ZRes
+
+                boxes = np.zeros((numBoxes, 6))
+                box = 0
+                X0new= X0
+                X1new = X1
+                Y0new = Y0
+                Y1new = Y1
+                Z0new = Z0
+                Z1new = Z1
+
+                for i in range(0, XRes):
+                    X0new = X0 + i * dx
+                    X1new = X0 + (i + 1) * dx
+                    for j in range(0, YRes):
+                        Y0new = Y0 + j * dy
+                        Y1new = Y0 + (j + 1) * dy
+                        for k in range(0, ZRes):
+                            Z0new = Z0 + k * dz
+                            Z1new = Z0 + (k + 1) * dz
+                            boxes[box][0] = X0new
+                            boxes[box][1] = X1new
+                            boxes[box][2] = Y0new
+                            boxes[box][3] = Y1new
+                            boxes[box][4] = Z0new
+                            boxes[box][5] = Z1new
+                            box = box + 1
+                self.boxCount = np.zeros[len(boxes)]
+                if X0 < posP[0] < X1 and Y0 < posP[1] < Y1 and Z0 < posP[2] < Z1:
+                    for i in range(0, len(boxes)):
+                        if boxes[i][0] < posP[0] < boxes[i][1] and boxes[i][2] < posP[1] < boxes[i][3] and boxes[i][4] < posP[2] < boxes[i][5]:
+                            self.boxCount[i] += 1
+                        else:
+                            pass
 
             self.m_LagrangianData.setX(p, posP)
             self.m_LagrangianData.setVectorData(v_i, a_ArrayName='Velocity', a_DataID=p)

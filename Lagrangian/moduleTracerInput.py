@@ -349,6 +349,25 @@ class SimInputs:
 
                     self.m_ResumeSimulation = lineDict[1].strip().lower() == 'true'
 
+                elif lineDict[0].strip() == 'Shannon Entropy':
+                    vals = lineDict[1].split(";")
+
+                    self.m_ShannonEntropy = vals[0]
+                    EX0 = vals[1].replace(" ", "").split(":")[1]
+                    EX1 = vals[2].replace(" ", "").split(":")[1]
+                    EY0 = vals[3].replace(" ", "").split(":")[1]
+                    EY1 = vals[4].replace(" ", "").split(":")[1]
+                    EZ0 = vals[5].replace(" ", "").split(":")[1]
+                    EZ1 = vals[6].replace(" ", "").split(":")[1]
+                    Xres = vals[7].replace(" ", "").split(":")[1]
+                    Yres = vals[8].replace(" ", "").split(":")[1]
+                    Zres = vals[9].replace(" ", "").split(":")[1]
+                    self.m_EntropyBounds = np.array([[EX0, EX1], [EY0, EY1], [EZ0, EZ1]]).astype(float)
+                    self.m_EntropyRes = np.array([Xres, Yres, Zres]).astype(int)
+
+
+
+
         inputFileObj.close()
 
     def getTracerInput(self):
@@ -404,6 +423,14 @@ class SimInputs:
     def getSimPrec(self):
         return self.m_Dt_prec # for simulation precision
 
+    def getShannonEntropy(self):
+        return self.m_ShannonEntropy
+        
+    def getEntropyBounds(self):
+        return self.m_EntropyBounds
+
+    def getEntropyRes(self):
+        return self.m_EntropyRes
 ## Added by AS
     def getFlowDataTimeStep(self):
         return self.m_DataTimeDelta
