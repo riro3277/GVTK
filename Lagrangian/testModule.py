@@ -15,7 +15,7 @@ class Testing():
 
     def Compare(self):
         #Reading standard files and test files from both locations for comparison
-        StandardResults = self.StandardRoot + '/Lagrangian/StandardFiles/StandardFile1.txt'
+        StandardResults = self.StandardRoot + '/Lagrangian/StandardFiles/StandardFile0.txt'
         TestResults = self.RootDir + 'TestFiles/TestFile0.txt'
 
         StandardFile = open(StandardResults,'r')

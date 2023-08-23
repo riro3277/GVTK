@@ -530,6 +530,11 @@ class GVTKCollision(GVTKProblem):
 
     #------collision function starts here--------#
     # @jit(nopython=True)
+    def ShannonEntropy(pCount):
+        bins = []
+        for p in range(0, len(pCount)):
+            
+
     def sdfCollision(self, simTime, tWin_0, tWin_1, gradVel, boundaryCondition, a_Locator, a_DataSync=True, a_PolygonalCells=False):
 
         dist            = self.m_GridData.extractDataArray('sdf')
