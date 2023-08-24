@@ -352,7 +352,7 @@ class SimInputs:
                 elif lineDict[0].strip() == 'Shannon Entropy':
                     vals = lineDict[1].split(";")
 
-                    self.m_ShannonEntropy = vals[0]
+                    self.m_ShannonEntropy = vals[0].strip()
                     EX0 = vals[1].replace(" ", "").split(":")[1]
                     EX1 = vals[2].replace(" ", "").split(":")[1]
                     EY0 = vals[3].replace(" ", "").split(":")[1]
@@ -425,7 +425,7 @@ class SimInputs:
 
     def getShannonEntropy(self):
         return self.m_ShannonEntropy
-        
+
     def getEntropyBounds(self):
         return self.m_EntropyBounds
 

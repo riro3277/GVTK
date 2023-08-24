@@ -83,6 +83,8 @@ class GVTKCollision(GVTKProblem):
                 if os.path.isfile(testFilesDir + 'TestFile' + str(p) + '.txt') == True:
                     with open(testFilesDir + 'TestFile' + str(p) + '.txt', 'w'):
                         pass
+        else:
+            self.Root_dir = self.m_InputData.getRootPath()
 
         timeIndex    = 0
         timeElapsed0 = 0.0
@@ -521,19 +523,41 @@ class GVTKCollision(GVTKProblem):
         #Runs regression test module for doumentation and test to standard file comparison
         if self.Mode == "test":
              baseDir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-             case = Testing(self.Root_dir, baseDir)
-             case.Compare()
-             case.Documentation()
+             # case = Testing(self.Root_dir, baseDir)
+             # case.Compare()
+             # case.Documentation()
             #-------------------------
-        if self.Shannon_Entropy == True:
-            print(self.boxCount)
+
 
     #------collision function starts here--------#
     # @jit(nopython=True)
-    def ShannonEntropy(pCount):
-        bins = []
+    def ShannonEntropy(self, pCount, time):
+        bins = np.zeros((len(pCount)))
+        sum = 0
+        S = 0
         for p in range(0, len(pCount)):
-            
+            sum += (pCount[p]/self.numParticles)
+        for p in range(0, len(pCount)):
+            bins[p] = (pCount[p]/self.numParticles)/(sum)
+            if bins[p] != 0:
+                S += bins[p]*np.log(bins[p])
+            else:
+                S += 0
+        S = -S
+        if time == self.m_InputData.getSimulationStartTime():
+            file = open(self.Root_dir + "Shannon_Entropy.txt", 'w')
+            # file2 = open(self.Root_dir + "BinCounts.txt", "w")
+        else:
+            file = open(self.Root_dir + "Shannon_Entropy.txt", "a")
+            # file2 = open(self.Root_dir + "BinCounts.txt", "a")
+        file.write("t:{},S:{}".format(time,S))
+        file.write("\n")
+        # for p in range(0, len(pCount)):
+        #     file2.write("Bin{} Count:{}".format(p, pCount[p]))
+        #     file2.write("\n")
+        file.close()
+
+        return S
 
     def sdfCollision(self, simTime, tWin_0, tWin_1, gradVel, boundaryCondition, a_Locator, a_DataSync=True, a_PolygonalCells=False):
 
@@ -807,7 +831,7 @@ class GVTKCollision(GVTKProblem):
                     Standard_File.write(str(bodyForce[i]) + ",")
                 Standard_File.write('\n')
 
-            if self.Shannon_Entropy == True:
+            if self.Shannon_Entropy == "True":
                 Bounds = self.m_InputData.getEntropyBounds()
 
                 Res = self.m_InputData.getEntropyRes()
@@ -860,13 +884,16 @@ class GVTKCollision(GVTKProblem):
                             boxes[box][4] = Z0new
                             boxes[box][5] = Z1new
                             box = box + 1
-                self.boxCount = np.zeros[len(boxes)]
+                if simTime == self.m_InputData.getSimulationStartTime():
+                    self.boxCount = np.zeros((len(boxes)))
                 if X0 < posP[0] < X1 and Y0 < posP[1] < Y1 and Z0 < posP[2] < Z1:
                     for i in range(0, len(boxes)):
                         if boxes[i][0] < posP[0] < boxes[i][1] and boxes[i][2] < posP[1] < boxes[i][3] and boxes[i][4] < posP[2] < boxes[i][5]:
                             self.boxCount[i] += 1
                         else:
                             pass
+                self.ShannonEntropy(self.boxCount, simTime)
+
 
             self.m_LagrangianData.setX(p, posP)
             self.m_LagrangianData.setVectorData(v_i, a_ArrayName='Velocity', a_DataID=p)
