@@ -14,6 +14,7 @@ try:
     import classGVTKInertialIntegration as L_INR
     import classGVTKVLPIntegration as L_VLP
     import classGVTKCollisionWithMaxeyRiley as L_COL
+    import classGVTKEntropyTracerIntegration as L_ENT
     import moduleTracerInput as L_INP
     import classGVTKGenericProblem as Prob
 except ImportError:
@@ -35,6 +36,7 @@ if len(sys.argv) == 2:
     if sys.argv[1].strip() == "test":
         executeMode = sys.argv[1].strip()
         inputFile = os.path.dirname(os.path.abspath(__file__)) +"/input-tracer-analytical-standard.dat"
+
 #General message to show possible modes of operation and how to run the regression test
 elif len(sys.argv) != 3:
     print("Modes of Operation:")
@@ -66,6 +68,8 @@ elif executeMode == 'collision':
     ensemble    = L_COL.GVTKCollision(simInput)
 elif executeMode == 'test':
     ensemble = L_COL.GVTKCollision(simInput)
+elif executeMode == 'entropy':
+    ensemble = L_ENT.GVTKTracerIntegration(simInput)
 ensemble.runCompute()
 
 #-------------

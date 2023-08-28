@@ -69,8 +69,17 @@ class SimInputs:
 
                 # checked
                 elif lineDict[0].strip() == 'Tracer input file':
-
-                    self.m_TracerInput = self.m_RootPath + lineDict[1].strip()
+                    releases = lineDict[1].strip()
+                    releases = releases.split(",")
+                    if len(releases) > 1:
+                        self.m_TracerInput = []
+                        for i in range(0, len(releases)):
+                            releases[i] = releases[i].strip()
+                            tracer = self.m_RootPath + releases[i]
+                            self.m_TracerInput.append(tracer)
+                    else:
+                        releases[0] = releases[0].strip()
+                        self.m_TracerInput = self.m_RootPath + releases[0]
 
                 # checked
                 elif lineDict[0].strip() == 'Discrete element input file':
@@ -147,8 +156,17 @@ class SimInputs:
 
                 # checked
                 elif lineDict[0].strip() == 'Lagrangian tracer output file':
+                    Outputs = lineDict[1].strip()
+                    Outputs = Outputs.split(",")
 
-                    self.m_TracerOutputFile = lineDict[1].strip()
+                    if len(Outputs) > 1:
+                        self.m_TracerOutputFile = []
+                        for i in range(0, len(Outputs)):
+                            Outputs[i] = Outputs[i].strip()
+                            self.m_TracerOutputFile.append(Outputs[i])
+                    else:
+                        self.m_TracerOutputFile = lineDict[1].strip()
+
 
                 # checked
                 elif lineDict[0].strip() == 'Lagrangian field output file':
@@ -469,13 +487,25 @@ class SimInputs:
     def getTracerDiffusivity(self):
         return self.m_TracerDiffCoeff
 
-    def getTracerOutputFile(self, a_ID1=None, a_ID2=None):
+    def getTracerOutputFile(self, a_ID1=None):
 
-      if (a_ID1 is not None) and (a_ID2 is not None):
-          tempName    = self.m_TracerOutputFile.split('.')
-          return self.m_RootPath + tempName[0] + '_Injection-' + str(a_ID1) + '_' + str(a_ID2)  + '.' + tempName[1]
-      else:
-          return self.m_RootPath + self.m_TracerOutputFile
+
+
+        if (a_ID1 is not None):
+            if type(self.m_TracerOutputFile) == list:
+                self.m_TracerOutputFileArr = []
+
+                for i in range(0, len(self.m_TracerOutputFile)):
+                    tempName    = self.m_TracerOutputFile[i].split('.')
+                    self.m_TracerOutputFileArr.append(self.m_RootPath + tempName[0] + '_' + str(a_ID1) + '.' + tempName[1])
+                return self.m_TracerOutputFileArr
+            else:
+                tempName    = self.m_TracerOutputFile.split('.')
+                print(self.m_RootPath + tempName[0] + '_' + str(a_ID1) + '.' + tempName[1])
+                return self.m_RootPath + tempName[0] + '_' + str(a_ID1) + '.' + tempName[1]
+        else:
+            return self.m_RootPath + self.m_TracerOutputFile
+
 
     def getInitialVelocity(self):
         return self.m_InitialVelocity
