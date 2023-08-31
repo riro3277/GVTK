@@ -72,10 +72,12 @@ class GVTKTracerIntegration(GVTKProblem):
         #----------------------------------------------------------
         # initialize tracer data from an external VTK polydata file
         # and update the Lagrangian tracer object for the problem
-        #----------------------------------------------------------
+        #----------------------------------------------------------''
+        self.m_totalparticles = []
         self.m_LagrangianDataArr = []
         self.Shannon_Entropy = self.m_InputData.getShannonEntropy()
         if self.Shannon_Entropy == "True":
+            self.FormEntropyBoxes()
             releases = self.m_InputData.getTracerInput()
 
             for i in range(0, len(releases)):
@@ -83,6 +85,12 @@ class GVTKTracerIntegration(GVTKProblem):
 
         else:
             self.m_LagrangianDataArr.append(GVTKLagrangianData(a_File=self.m_InputData.getTracerInput()))
+
+        self.IDarr = []
+        for i in range(0, len(self.m_LagrangianDataArr)):
+            self.IDarr.append(i)
+            self.m_LagrangianData = self.m_LagrangianDataArr[i]
+            self.m_totalparticles.append(self.numParticles)
 
 
         #--------------------------------------------------------------------------
@@ -377,8 +385,9 @@ class GVTKTracerIntegration(GVTKProblem):
             if (simTime == self.m_InputData.getSimulationStartTime() and self.m_InputData.isFixedMesh()) or (self.m_ResumeSimulation and self.m_InputData.isFixedMesh()):
                 print("Building Cell Locator Maps")
                 self.m_GridData.buildLocator()
-
+            self.boxCount = np.zeros((len(self.IDarr), len(self.Entropyboxes)))
             for i in range(0, len(self.m_LagrangianDataArr)):
+                self.ID = self.IDarr[i]
                 self.m_LagrangianData = self.m_LagrangianDataArr[i]
             #-----------------------------------------------
             # STEP 6: Output initial positions of particles
@@ -412,8 +421,137 @@ class GVTKTracerIntegration(GVTKProblem):
                 #----------------------------------------------------------------------
                 if timeIndex%self.m_InputData.m_WriteInterval == 0:
                     self.m_LagrangianData.writeData(self.m_InputData.getTracerOutputFile(a_ID1=timeIndex)[i])
+            self.ShannonEntropy(self.boxCount, simTime)
 
 
+    def FormEntropyBoxes(self):
+
+        Bounds = self.m_InputData.getEntropyBounds()
+
+        Res = self.m_InputData.getEntropyRes()
+
+        XRes = Res[0]
+        YRes = Res[1]
+        ZRes = Res[2]
+
+        numBoxes = XRes * ZRes * YRes
+
+        self.EntropyX0 = Bounds[0][0]
+        self.EntropyX1 = Bounds[0][1]
+        self.EntropyY0 = Bounds[1][0]
+
+        self.EntropyY1 = Bounds[1][1]
+        self.EntropyZ0 = Bounds[2][0]
+        self.EntropyZ1 = Bounds[2][1]
+
+        XRange = self.EntropyX1 - self.EntropyX0
+        dx = XRange / XRes
+
+        YRange = self.EntropyY1 - self.EntropyY0
+        dy = YRange / YRes
+
+        ZRange = self.EntropyZ1 - self.EntropyZ0
+        dz = ZRange / ZRes
+
+        self.Entropyboxes = np.zeros((numBoxes, 6))
+        box = 0
+        X0new= self.EntropyX0
+        X1new = self.EntropyX1
+        Y0new = self.EntropyY0
+        Y1new = self.EntropyY1
+        Z0new = self.EntropyZ0
+        Z1new = self.EntropyZ1
+
+        for i in range(0, XRes):
+            X0new = self.EntropyX0 + i * dx
+            X1new = self.EntropyX0 + (i + 1) * dx
+            for j in range(0, YRes):
+                Y0new = self.EntropyY0 + j * dy
+                Y1new = self.EntropyY0 + (j + 1) * dy
+                for k in range(0, ZRes):
+                    Z0new = self.EntropyZ0 + k * dz
+                    Z1new = self.EntropyZ0 + (k + 1) * dz
+                    self.Entropyboxes[box][0] = X0new
+                    self.Entropyboxes[box][1] = X1new
+                    self.Entropyboxes[box][2] = Y0new
+                    self.Entropyboxes[box][3] = Y1new
+                    self.Entropyboxes[box][4] = Z0new
+                    self.Entropyboxes[box][5] = Z1new
+                    box = box + 1
+
+    def EntropyParticleCount(self, posP, ID):
+        if self.EntropyX0 < posP[0] < self.EntropyX1 and self.EntropyY0 < posP[1] < self.EntropyY1 and self.EntropyZ0 < posP[2] < self.EntropyZ1:
+            for i in range(0, len(self.Entropyboxes)):
+                if self.Entropyboxes[i][0] < posP[0] < self.Entropyboxes[i][1] and self.Entropyboxes[i][2] < posP[1] < self.Entropyboxes[i][3] and self.Entropyboxes[i][4] < posP[2] < self.Entropyboxes[i][5]:
+                    self.boxCount[ID][i] += 1
+                else:
+                    pass
+    def ShannonEntropy(self, pCount, time):
+        array = pCount
+        totals = self.m_totalparticles
+
+        p = np.zeros((len(array), len(array[0])))
+        pcj = np.zeros((len(array), len(array[0])))
+        pbin = np.zeros((len(array[0])))
+        pclass = np.zeros((len(array)))
+        pj = np.zeros((len(array[0])))
+        pjnum  = np.zeros((len(array[0])))
+        pcjden = np.zeros((len(array[0])))
+        pden = 0
+        S = 0
+        Sj = np.zeros((len(array[0])))
+        Sloc = 0
+        Slocsp = 0
+        for i in range(0, len(array)):
+            for j in range(0, len(array[i])):
+                pbin[j] += array[i][j]
+                pclass[i] += array[i][j]
+                pcjden[j] += array[i][j]/totals[i]
+                pjnum[j] += array[i][j]/totals[i]
+                pden += array[i][j]/totals[i]
+
+        for i in range(0, len(p)):
+            for j in range(0, len(p[i])):
+
+                p[i][j] = (array[i][j] / totals[i]) / pden
+                pcj[i][j] = (array[i][j] / totals[i]) / pcjden[j]
+                pj[j] = (pjnum[j]) / pden
+
+                if p[i][j] != 0:
+                    S += p[i][j]*np.log(p[i][j])
+                else:
+                    S += 0
+                if pcj[i][j] != 0:
+                    # Sj[j] += pcj[i][j]
+                    Sj[j] += (pcj[i][j]*np.log(pcj[i][j]))*-1
+
+                else:
+                    Sj[j] += 0
+
+
+
+        for j in range(0, len(array[0])):
+            if pj[j] != 0:
+                Sloc += (pj[j]*np.log(pj[j]))*-1
+                Slocsp += pj[j]*Sj[j]
+            else:
+                Sloc += 0
+                Slocsp += 0
+        S = -S
+        if time == self.m_InputData.getSimulationStartTime():
+            file = open(self.m_InputData.m_RootPath + "Shannon_Entropy.txt", 'w')
+            # file2 = open(self.Root_dir + "BinCounts.txt", "w")
+        else:
+            file = open(self.m_InputData.m_RootPath + "Shannon_Entropy.txt", "a")
+            # file2 = open(self.Root_dir + "BinCounts.txt", "a")
+        file.write("t:{},S:{},Sloc:{},Sloc(species):{},Sum:{}".format(time,S,Sloc,Slocsp,Sloc+Slocsp))
+        file.write("\n")
+        # for p in range(0, len(pCount)):
+        #     file2.write("Bin{} Count:{}".format(p, pCount[p]))
+        #     file2.write("\n")
+        file.close()
+
+        return S
 
     def integrateForwardEuler(self, a_T, a_T0, a_T1, a_BoundaryCondition, a_DataSync=True, a_PolygonalCells=False):
         """Forward Euler time integration routine for individual particles
@@ -476,6 +614,9 @@ class GVTKTracerIntegration(GVTKProblem):
             #     print("To Be Implemented")
 
             self.m_LagrangianData.setX(p, xyz)
+
+            self.EntropyParticleCount(xyz, self.ID)
+
 
     #--------------------------------------------------------------------------
     # time integration routine for individual particles: Runge Kutta Integrator
