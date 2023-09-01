@@ -413,14 +413,15 @@ class GVTKTracerIntegration(GVTKProblem):
                 #------------------------------------------------
                 # STEP 8: update time indices and simulation time
                 #------------------------------------------------
-                timeIndex += 1
-                simTime    = round(simTime+dT, self.simPrec)
+
 
                 #----------------------------------------------------------------------
                 # STEP 9: at the end of appropriate number of steps dump data into file
                 #----------------------------------------------------------------------
                 if timeIndex%self.m_InputData.m_WriteInterval == 0:
                     self.m_LagrangianData.writeData(self.m_InputData.getTracerOutputFile(a_ID1=timeIndex)[i])
+            timeIndex += 1
+            simTime    = round(simTime+dT, self.simPrec)
             self.ShannonEntropy(self.boxCount, simTime)
 
 

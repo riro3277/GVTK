@@ -1,0 +1,75 @@
+Problem dimension = 3
+
+Debug mode = True
+
+Project directory = /mnt/d/LagrangianCode/Lagrangian_CMP2023/gvtktest/Cases/cylindrical_flow/
+
+Flow data directory = velocity/
+
+Flow data file tag = u
+
+SDF files = Meshfile : volume-mesh-wSDF-igl.vtu ; Surfacefile : Surface.stl ; OutputSDFGradfile : cylindrical-sdf-grad.vtu
+
+Flow data field name = Velocity
+
+Tracer input file = Inletv1-seeds.vtk, Surface-Seedsv1.vtk
+
+Discrete element input file = ENSEMBLE : particles.dat ; TRANSFORM : transformdata.dat
+
+Lagrangian field output file = none
+
+Lagrangian tracer output file = TOutput_Inlet/Itracer.vtk, TOutput_Surface/Stracer.vtk
+
+Data file index = START : 0 ; STOP : 100 ; DELTA : 1 ; COUNT : 101
+
+Data file timing = START : 0.0 ; STOP : 1.0 ; DELTA : 0.01 ; PERIODIC : True
+
+Output file index = START : 0 ; STOP : 20000 ; DELTA : 200
+
+Output file timing = START : 0.0 ; INTERVAL : 0.00005
+
+Simulation timing = START : 0.0 ; STOP : 0.5 ; DELTA : 0.00005
+
+Integration setup = SCHEME : feu
+
+Write interval = 200
+
+Fixed mesh = True
+
+Lagrangian module set up = FWDTLE : False ; BWDFTLE : False ; STRETCH : False ; STRAIN : False
+
+Lagrangian kinematics unit vectors = V1 : 1.0 0.0 0.0 ; V2 : 0.0 1.0 0.0 ; V3 : 0.0 0.0 1.0
+
+Standard flow geometry attributes = ANCHOR : 0.0 , 0.0 , 0.0 ; DX : 1.0 ; DY : 1.0 ; DZ : 1.0 ; R0 : 0.25
+
+Standard boundary tags = S0 : tag ; S1 : tag ; S2 : tag ; S3 : tag ; S4 : tag ; S5 : tag
+
+Standard Lagrangian geometry attributes = ANCHOR : 0.25 ; 0.25 ; 0.25 ; 0.75 ; 0.75 ; 0.75 ; DX : 0.01 ; DY : 0.01 ; DZ : 0.01 ; R0 : 0.25
+
+Lagrangian initial velocity = True; 0 ; 0 ; 0
+
+Gravity Vector = 0.0 ; 0.0 ; -9806.65
+
+Restitution = 0.75
+
+Particle Size = CONSTANT : True ; R0 : 0.25 ; STD DEV :
+
+Particle injection = False ; NUMBER : 1 ; START : 0.0 ; INTERVAL : 0.01
+
+Flow properties = ANALYTICAL : 0 ; VISCOSITY : 0.004 ; DENSITY : 0.00106
+
+Particle properties = DENSITY : 0.0011 ; DIFFUSION : 1.0e-6
+
+Surface Normals = CONVERT : False ; FLIP : False ; SCALING : 1.0
+
+Particle in cell locator = OCT : False ; TRE : True ; BSP : False
+
+Particle pathlines = False ; SUBSAMPLE : 1 , 1 ; DDGCALC : True
+
+Shannon Entropy = True ; X0 : -2 ; X1 : 2 ; Y0 : -2 ; Y1 : 2 ; Z0 : 0 ; Z1 : 10; XRes : 5 ; YRes : 5 ; ZRes : 5
+
+Residence time module setup = MODE : mapped ; ROI : none ; INJECT : none ; 0
+
+Infectious disease module setup = MODE : mapped ; ROI : none ; INJECT : none ; 0
+
+Resume simulation = False

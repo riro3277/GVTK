@@ -492,16 +492,16 @@ class SimInputs:
 
 
         if (a_ID1 is not None):
+
             if type(self.m_TracerOutputFile) == list:
                 self.m_TracerOutputFileArr = []
-
                 for i in range(0, len(self.m_TracerOutputFile)):
                     tempName    = self.m_TracerOutputFile[i].split('.')
                     self.m_TracerOutputFileArr.append(self.m_RootPath + tempName[0] + '_' + str(a_ID1) + '.' + tempName[1])
                 return self.m_TracerOutputFileArr
+
             else:
                 tempName    = self.m_TracerOutputFile.split('.')
-                print(self.m_RootPath + tempName[0] + '_' + str(a_ID1) + '.' + tempName[1])
                 return self.m_RootPath + tempName[0] + '_' + str(a_ID1) + '.' + tempName[1]
         else:
             return self.m_RootPath + self.m_TracerOutputFile
