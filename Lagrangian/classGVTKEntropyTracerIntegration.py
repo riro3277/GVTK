@@ -540,10 +540,10 @@ class GVTKTracerIntegration(GVTKProblem):
                 Slocsp += 0
         S = -S
         if time == self.m_InputData.getSimulationStartTime():
-            file = open(self.m_InputData.m_RootPath + "Shannon_Entropy.txt", 'w')
+            file = open(self.m_InputData.m_RootPath + "Shannon_Entropy" + str(self.m_InputData.getEntropyRes()[0]) + ".txt", 'w')
             # file2 = open(self.Root_dir + "BinCounts.txt", "w")
         else:
-            file = open(self.m_InputData.m_RootPath + "Shannon_Entropy.txt", "a")
+            file = open(self.m_InputData.m_RootPath + "Shannon_Entropy" + str(self.m_InputData.getEntropyRes()[0]) + ".txt", "a")
             # file2 = open(self.Root_dir + "BinCounts.txt", "a")
         file.write("t:{},S:{},Sloc:{},Sloc(species):{},Sum:{}".format(time,S,Sloc,Slocsp,Sloc+Slocsp))
         file.write("\n")
