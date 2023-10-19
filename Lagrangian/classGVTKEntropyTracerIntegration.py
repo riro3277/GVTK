@@ -158,35 +158,41 @@ class GVTKTracerIntegration(GVTKProblem):
             #--------------------------------------------------------------
             # get list of files already output and assign initial velocity
             #--------------------------------------------------------------
-            dest_folder = self.m_InputData.m_RootPath + '/'.join(self.m_InputData.m_TracerOutputFile.split('/')[:-1]) + '/'
-            prev_files = os.listdir(dest_folder)
+            for data in range(len(self.m_LagrangianDataArr)):
+                dest_folder = self.m_InputData.m_RootPath + '/'.join(self.m_InputData.m_TracerOutputFile[data].split('/')[:-1]) + '/'
+                print(dest_folder)
+                prev_files = os.listdir(dest_folder)
 
-            #----------------------------
-            # find base file information
-            #----------------------------
-            base_file = '_'.join(prev_files[0].split('.')[0].split('_')[:-1])
-            file_ext  = '.' + prev_files[0].split('.')[1]
+                #----------------------------
+                # find base file information
+                #----------------------------
+                base_file = '_'.join(prev_files[0].split('.')[0].split('_')[:-1])
+                print(base_file)
+                file_ext  = '.' + prev_files[0].split('.')[1]
 
-            #--------------------------------------------
-            # trim list of files down to just time index
-            #--------------------------------------------
-            for i in range(len(prev_files)):
-                prev_files[i] = int(prev_files[i].split('_')[-1].split('.')[0])
+                #--------------------------------------------
+                # trim list of files down to just time index
+                #--------------------------------------------
+                for i in range(len(prev_files)):
+                    prev_files[i] = int(prev_files[i].split('_')[-1].split('.')[0])
+                print(prev_files)
+                #---------------------------------------------------
+                # update time index and get point data of last file
+                #---------------------------------------------------
+                timeIndex = max(prev_files)
+                print(timeIndex)
+                last_file = dest_folder + base_file + '_' + str(timeIndex) + file_ext
+                reader    = vtk.vtkPolyDataReader()
+                reader.SetFileName(last_file)
+                reader.Update()
+                for j in range(reader.GetOutput().GetNumberOfPoints()):
+                    point = reader.GetOutput().GetPoint(j)
+                    self.m_LagrangianDataArr[data].setX(j, point)
 
-            #---------------------------------------------------
-            # update time index and get point data of last file
-            #---------------------------------------------------
-            timeIndex = max(prev_files)
-            last_file = dest_folder + base_file + '_' + str(timeIndex) + file_ext
-            reader    = vtk.vtkPolyDataReader()
-            reader.SetFileName(last_file)
-            reader.Update()
-
-
-            #------------------------------
-            # update simTime and startTime
-            #------------------------------
-            simTime += self.m_InputData.m_WriteInterval * dT * timeIndex
+                #------------------------------
+                # update simTime and startTime
+                #------------------------------
+            simTime += round(dT * timeIndex, 2)
             print('Resuming simulation at', simTime, 's')
 
         #-------------------------------
@@ -540,10 +546,13 @@ class GVTKTracerIntegration(GVTKProblem):
                 Slocsp += 0
         S = -S
         if time == self.m_InputData.getSimulationStartTime():
-            file = open(self.m_InputData.m_RootPath + "Shannon_Entropy" + str(self.m_InputData.getEntropyRes()[0]) + ".txt", 'w')
+            if self.m_ResumeSimulation:
+                file = open(self.m_InputData.m_RootPath + "SmallShannon_Entropy" + str(self.m_InputData.getEntropyRes()[0]) + ".txt", "a")
+            else:
+                file = open(self.m_InputData.m_RootPath + "SmallShannon_Entropy" + str(self.m_InputData.getEntropyRes()[0]) + ".txt", 'w')
             # file2 = open(self.Root_dir + "BinCounts.txt", "w")
         else:
-            file = open(self.m_InputData.m_RootPath + "Shannon_Entropy" + str(self.m_InputData.getEntropyRes()[0]) + ".txt", "a")
+            file = open(self.m_InputData.m_RootPath + "SmallShannon_Entropy" + str(self.m_InputData.getEntropyRes()[0]) + ".txt", "a")
             # file2 = open(self.Root_dir + "BinCounts.txt", "a")
         file.write("t:{},S:{},Sloc:{},Sloc(species):{},Sum:{}".format(time,S,Sloc,Slocsp,Sloc+Slocsp))
         file.write("\n")

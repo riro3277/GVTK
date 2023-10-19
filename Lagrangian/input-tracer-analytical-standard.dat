@@ -73,3 +73,5 @@ Residence time module setup = MODE : mapped ; ROI : none ; INJECT : none ; 0
 Infectious disease module setup = MODE : mapped ; ROI : none ; INJECT : none ; 0
 
 Resume simulation = False
+
+Print Forces = True

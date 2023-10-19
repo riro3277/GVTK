@@ -14,6 +14,7 @@ try:
     import classGVTKInertialIntegration as L_INR
     import classGVTKVLPIntegration as L_VLP
     import classGVTKCollisionWithMaxeyRiley as L_COL
+    import classGVTKCollisionWithMaxeyRileyWallCorrection as L_CORR
     import classGVTKEntropyTracerIntegration as L_ENT
     import moduleTracerInput as L_INP
     import classGVTKGenericProblem as Prob
@@ -70,6 +71,8 @@ elif executeMode == 'test':
     ensemble = L_COL.GVTKCollision(simInput)
 elif executeMode == 'entropy':
     ensemble = L_ENT.GVTKTracerIntegration(simInput)
+elif executeMode == 'correction':
+    ensemble = L_CORR.GVTKCollision(simInput)
 ensemble.runCompute()
 
 #-------------

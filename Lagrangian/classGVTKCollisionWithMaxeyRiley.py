@@ -10,6 +10,7 @@
 import sys, os, vtk
 import numpy as np
 import time
+import random
 
 from numpy import linalg as la
 
@@ -85,7 +86,7 @@ class GVTKCollision(GVTKProblem):
                         pass
         else:
             self.Root_dir = self.m_InputData.getRootPath()
-
+        self.pid = 0
         timeIndex    = 0
         timeElapsed0 = 0.0
         timeElapsed1 = 0.0
@@ -96,7 +97,7 @@ class GVTKCollision(GVTKProblem):
         tWin_0    = timeWindowDict['T_Low'][0]
         tWin_1    = timeWindowDict['T_Up'][0]
         data_DT   = self.m_InputData.getFlowDataTimeStep()
-        self.Shannon_Entropy = self.m_InputData.getShannonEntropy()
+
         isSingleStageIntegration = True # set true for feu and false for for rk4
 
         #-----------------------------------------------------------------------
@@ -142,10 +143,19 @@ class GVTKCollision(GVTKProblem):
             reader    = vtk.vtkPolyDataReader()
             reader.SetFileName(last_file)
             reader.Update()
+
+            # dim = data.GetDimensions()
+            # vec = list(dim)
+            # vec = [i-1 for i in dim]
+            # vec.append(3)
+            # u = vtk.util.vtk_to_numpy(data.GetCellData().GetArray('velocity'))
             for i in range(reader.GetOutput().GetNumberOfPoints()):
                 point = reader.GetOutput().GetPoint(i)
                 self.m_LagrangianData.setX(i, point)
 
+                # test = self.m_LagrangianData.setVectorData(a_ArrayName= "Velocity", a_DataID = i)
+                # print(self.m_LagrangianData.getVectorData(a_ArrayName = "Velocity", a_DataID = 0))
+                # sys.exit("in reseume sim")
             #------------------------------
             # update simTime and startTime
             #------------------------------
@@ -496,14 +506,18 @@ class GVTKCollision(GVTKProblem):
 
             # measure time for particle collision
             t2 = time.process_time()
-            self.sdfCollision(simTime, tWin_0, tWin_1, gradVel, boundaryCondition, locatorObj, a_DataSync=isDataPointSync, a_PolygonalCells=False)
+
+            if self.m_InputData.isSteadyFlowData():
+                self.sdfCollisionSS(simTime, tWin_0, tWin_1, boundaryCondition, locatorObj, a_DataSync=isDataPointSync, a_PolygonalCells=False)
+            else:
+                self.sdfCollision(simTime, tWin_0, tWin_1, gradVel, boundaryCondition, locatorObj, a_DataSync=isDataPointSync, a_PolygonalCells=False)
             t3 = time.process_time()
 
             #----------------------------------------------------------------------
             # STEP 8: at the end of appropriate number of steps dump data into file
             #----------------------------------------------------------------------
             if timeIndex%self.m_InputData.m_WriteInterval == 0:
-                self.m_LagrangianData.writeData(self.m_InputData.getTracerOutputFile(a_ID1=0, a_ID2=timeIndex))
+                self.m_LagrangianData.writeData(self.m_InputData.getTracerOutputFile(a_ID1=timeIndex))
             # if self.Mode == "test":
             #      baseDir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             #      sys.exit(print("Here", baseDir, self.Root_dir))
@@ -609,6 +623,7 @@ class GVTKCollision(GVTKProblem):
 
                         self.m_LagrangianData.addVectorData('Velocity', InitialVelocity)
             v_i          = np.array(self.m_LagrangianData.getVectorData(a_ArrayName='Velocity', a_DataID=p)) # particle velocity
+
             # print('velocityp=', v_i)
             # sys.exit()
             ## error with using the same name for cell assisgnment: FindCell argument 1: 'tuple' object does not support item assignment
@@ -831,73 +846,204 @@ class GVTKCollision(GVTKProblem):
                     Standard_File.write(str(bodyForce[i]) + ",")
                 Standard_File.write('\n')
 
-            if self.Shannon_Entropy == "True":
-                Bounds = self.m_InputData.getEntropyBounds()
-
-                Res = self.m_InputData.getEntropyRes()
-
-                XRes = Res[0]
-                YRes = Res[1]
-                ZRes = Res[2]
-
-                numBoxes = XRes * ZRes * YRes
-
-                X0 = Bounds[0][0]
-                X1 = Bounds[0][1]
-                Y0 = Bounds[1][0]
-
-                Y1 = Bounds[1][1]
-                Z0 = Bounds[2][0]
-                Z1 = Bounds[2][1]
-
-                XRange = X1 - X0
-                dx = XRange / XRes
-
-                YRange = Y1 - Y0
-                dy = YRange / YRes
-
-                ZRange = Z1 - Z0
-                dz = ZRange / ZRes
-
-                boxes = np.zeros((numBoxes, 6))
-                box = 0
-                X0new= X0
-                X1new = X1
-                Y0new = Y0
-                Y1new = Y1
-                Z0new = Z0
-                Z1new = Z1
-
-                for i in range(0, XRes):
-                    X0new = X0 + i * dx
-                    X1new = X0 + (i + 1) * dx
-                    for j in range(0, YRes):
-                        Y0new = Y0 + j * dy
-                        Y1new = Y0 + (j + 1) * dy
-                        for k in range(0, ZRes):
-                            Z0new = Z0 + k * dz
-                            Z1new = Z0 + (k + 1) * dz
-                            boxes[box][0] = X0new
-                            boxes[box][1] = X1new
-                            boxes[box][2] = Y0new
-                            boxes[box][3] = Y1new
-                            boxes[box][4] = Z0new
-                            boxes[box][5] = Z1new
-                            box = box + 1
-                if simTime == self.m_InputData.getSimulationStartTime():
-                    self.boxCount = np.zeros((len(boxes)))
-                if X0 < posP[0] < X1 and Y0 < posP[1] < Y1 and Z0 < posP[2] < Z1:
-                    for i in range(0, len(boxes)):
-                        if boxes[i][0] < posP[0] < boxes[i][1] and boxes[i][2] < posP[1] < boxes[i][3] and boxes[i][4] < posP[2] < boxes[i][5]:
-                            self.boxCount[i] += 1
+            if self.m_InputData.getPrintForces() == "true":
+                if cell !=-1:
+                    if p == 0:
+                        shearGradmag = np.sqrt((shearGradLift[0]**2)+(shearGradLift[1]**2)+(shearGradLift[2]**2))
+                        if simTime == self.m_InputData.getSimulationStartTime():
+                            file = open(self.m_InputData.m_RootPath + "ShearGradForceNoCorrection.txt", 'w')
                         else:
-                            pass
-                self.ShannonEntropy(self.boxCount, simTime)
+                            file = open(self.m_InputData.m_RootPath + "ShearGradForceNoCorrection.txt", 'a')
+                        file.write("Time:{}, SDF:{}, ShearGradMag:{}, ShearGrad:{}-{}-{}\n".format(simTime, d[0], shearGradmag, shearGradLift[0], shearGradLift[1],shearGradLift[2]))
 
 
             self.m_LagrangianData.setX(p, posP)
             self.m_LagrangianData.setVectorData(v_i, a_ArrayName='Velocity', a_DataID=p)
 
+    def sdfCollisionSS(self, simTime, tWin_0, tWin_1, boundaryCondition, a_Locator, a_DataSync=True, a_PolygonalCells=True):
+        restitution = 0.75
+        flowVel   = self.m_GridData.extractDataArray('velocity')
+        dist      = self.m_GridData.extractDataArray('sdf')
+        normVec   = self.m_GridData.extractDataArray('sdf-grad')
+        dT        = self.m_InputData.getIntegrationTimeStep()
+        accGrav = self.m_InputData.getGravityVector()
+        delv_delT    = np.zeros(3)
+        delv_delT[0] = 0
+        delv_delT[1] = 0
+        delv_delT[2] = 0
+
+        c_1 = 0.1806
+        c_2 = 0.6459
+        c_3 = 0.4251
+        c_4 = 6886.95
+        d_1 = (3.0 * self.m_InputData.getFluidDensity())/(8.0 * self.m_InputData.m_TracerRadius)
+        C_am    = 1.0
+        accGrav = self.m_InputData.getGravityVector()
+        # print('gravity=', accGrav)
+        # sys.exit()
+
+        #------------------------------------------
+        # forward euler integration implementation
+        #------------------------------------------
+        TDrag = 0.0
+        Tshear = 0.0
+        Tadded = 0.0
+        Tuforce = 0.0
+        Tbody = 0.0
+        c = 0.0
+    #------------------------------------------
+        # forward euler integration implementation for only drag forces
+        #------------------------------------------
+        for p in range(self.numParticles):
+            posP  = self.m_LagrangianData.getX(p)
+            if self.m_InputData.m_InitialVelocityStatus == "False":
+                if simTime == self.m_InputData.getSimulationStartTime():
+                        if a_PolygonalCells == True:
+                            v           = self.m_GridData.gridInterpolateAveraging(posP, 'v0')
+                        else:
+                            v           = self.m_GridData.gridInterpolateNodalBasis(posP, 'v0')
+                        InitialVelocity = np.zeros((self.numParticles, 3))
+                        InitialVelocity[:,0] = float(v[0])
+                        InitialVelocity[:,1] = float(v[1])
+                        InitialVelocity[:,2] = float(v[2])
+
+                        self.m_LagrangianData.addVectorData('Velocity', InitialVelocity)
+
+
+            v_i   = np.array(self.m_LagrangianData.getVectorData(a_ArrayName='Velocity', a_DataID=p))
+
+            #print('Time=', simTime, 'particle0=', p, 'position0=', posP, 'Pvelocity0=', v_i)
+            cell      = a_Locator.FindCell(posP)
+            cellPtIds = vtk.vtkIdList()
+            tauP      = 2.0*self.m_InputData.getTracerDensity()*(self.m_InputData.m_TracerRadius**2)/(9.0*self.m_InputData.getFluidViscosity())
+            r_ana = np.sqrt(posP[0]*posP[0]+posP[1]*posP[1])+1e-16
+            if a_DataSync == True:
+                if a_PolygonalCells == True:
+                    v = self.m_GridData.gridInterpolateAveraging(posP, 'v0')
+                else:
+                    v = self.m_GridData.gridInterpolateNodalBasis(posP, 'v0')
+            else:
+                if a_PolygonalCells == True:
+                    vPlus  = self.m_GridData.gridInterpolateAveraging(posP, 'v1')
+                    vMinus = self.m_GridData.gridInterpolateAveraging(posP, 'v0')
+                else:
+                    vPlus  = self.m_GridData.gridInterpolateNodalBasis(posP, 'v1')
+                    vMinus = self.m_GridData.gridInterpolateNodalBasis(posP, 'v0')
+                v = vMinus + (simTime - tWin_0) * (vPlus - vMinus)/(tWin_1 - tWin_0)
+            #print('particle_f=', p, 'position_f=', posP, 'Flowvel=', v)
+            if cell !=-1:
+                self.m_GridData.m_vtkData.GetCellPoints(cell, cellPtIds)
+
+                #--------Edits for Gradient calculation based on Nodal Basis interpolation is done by Sreeparna----------#
+                gradUU = self.m_GridData.gridInterpolateNodalBasis(posP,'v0', a_GetGradient=True, a_GetStatus=False, a_DataDim=3, a_DataType='double')
+                gradU = np.array(gradUU.flat) #----Matrix is converted to arrays edited by Sreeparna----#
+
+                #---------Calculate the material derivative of fluid velocity field-----------#
+                lhsNS    = np.zeros(3)
+                lhsNS[0] = delv_delT[0] + v[0]*gradU[0] + v[1]*gradU[1] + v[2]*gradU[2]
+                lhsNS[1] = delv_delT[1] + v[0]*gradU[3] + v[1]*gradU[4] + v[2]*gradU[5]
+                lhsNS[2] = delv_delT[2] + v[0]*gradU[6] + v[1]*gradU[7] + v[2]*gradU[8]
+
+                #-------Calculate vorticity from the components of the velocity gradient tensor-------#
+                vor      = np.zeros(3)
+                vor[0]   = gradU[7] - gradU[5]
+                vor[1]   = gradU[2] - gradU[6]
+                vor[2]   = gradU[3] - gradU[1]
+
+                vol_p = 4.0*3.14*(self.m_InputData.m_TracerRadius)**3.0/3.0
+                #-------calculation of particle slip velocity Reynolds number--------#
+                # Re_p = (self.m_InputData.getTracerDensity() * la.norm(v - v_i) * 2 * self.m_InputData.m_TracerRadius)/self.m_InputData.getFluidViscosity()
+                Re_p = (self.m_InputData.getFluidDensity() * la.norm(v - v_i) * 2.0 * self.m_InputData.m_TracerRadius)/self.m_InputData.getFluidViscosity()
+
+                #-------calculation of shear based Reynolds number--------#
+                Re_g = self.m_InputData.getFluidDensity() * la.norm(gradU) * ((2.0 * self.m_InputData.m_TracerRadius)**2.0)/self.m_InputData.getFluidViscosity()
+
+                alpha_LSA = 0.5 * (Re_g/(Re_p + 1.0e-20))
+                # CoeffLift_extra = (3.0/(4.0 * np.pi * self.m_InputData.m_TracerRadius)) * np.sqrt((self.m_InputData.getFluidDensity() * self.m_InputData.getFluidViscosity()) / (la.norm(vor) + 1.0e-16))
+                CoeffLift_extra = self.m_InputData.getFluidDensity()*(self.m_InputData.m_TracerRadius)**2.0/(vol_p)*np.sqrt((self.m_InputData.getFluidViscosity()/self.m_InputData.getFluidDensity())/(la.norm(vor) + 1.0e-20))
+
+                if Re_p == 0:
+                    coeffSL = 6.46 * CoeffLift_extra
+                elif Re_p <= 40.0:
+                    coeffSL = 6.46 * ((1.0 - 0.3314 * np.sqrt(alpha_LSA)) * np.exp(-Re_p/10.0) + 0.3314 * np.sqrt(alpha_LSA)) * CoeffLift_extra
+                else:
+                    # coeffSL = 6.46 * 0.0524 * np.sqrt(0.5 * Re_g) * CoeffLift_extra
+                    coeffSL = 6.46 * 0.0524 * np.sqrt(alpha_LSA * Re_p) * CoeffLift_extra
+
+                #-----------calculation of Drag coefficient----------#
+                C_D = (24.0/(Re_p + 1.0e-20)) * (1 + c_1*(Re_p + 1.0e-20)**c_2) + c_3/(1 + (c_4/(Re_p + 1.0e-20)))
+
+                #-----------calculation of Drag Force----------#
+                drag = d_1 * C_D * la.norm(v - v_i) * (v - v_i)
+
+                #-----------calculation of Shear Lift Force----------#
+                shearGradLift = coeffSL * np.cross(v - v_i, vor)
+
+                #--------------Calculation Of Added Mass Force----------#
+                ambForce = self.m_InputData.getFluidDensity() * (1.0 + (C_am/2.0)) * lhsNS
+                addedmass = self.m_InputData.getFluidDensity() * 0.5 * C_am * lhsNS
+                undisturbedforce = self.m_InputData.getFluidDensity() * lhsNS
+
+                #---------Calculation Of Buoyancy-----------#
+                bodyForce = (self.m_InputData.getTracerDensity() - self.m_InputData.getFluidDensity()) * accGrav
+
+                #--------Now sum up all the forces to calculate the total force on the particle----------#
+                v_i = v_i + (1.0/(self.m_InputData.getTracerDensity() + self.m_InputData.getFluidDensity()*(C_am/2.0))) * dT * (drag + shearGradLift + ambForce + bodyForce)
+
+                #------------Calculation of SDF Gradients----------#
+                gN1 = np.asarray(normVec.GetTuple3(cellPtIds.GetId(0)))
+                gN2 = np.asarray(normVec.GetTuple3(cellPtIds.GetId(1)))
+                gN3 = np.asarray(normVec.GetTuple3(cellPtIds.GetId(2)))
+                gN4 = np.asarray(normVec.GetTuple3(cellPtIds.GetId(3)))
+
+                #---------calculate distance of particle position from wall-----------#
+                d   = self.m_GridData.gridInterpolateNodalBasis(posP,'sdf', a_GetGradient=False, a_GetStatus=False, a_DataDim=1, a_DataType='double')
+                g   = 0.25*(gN1 + gN2 + gN3 + gN4)
+
+                #-----------checking for collision-----------#
+                if d <= self.m_InputData.m_TracerRadius:
+                #----calculate normal component of particle velocity----#
+                    vn      = np.dot(v_i,g)/la.norm(g)
+                #-------if the direction of the normal component of velocity is inside the domain------#
+                    if vn < 0.0:
+                #----calculate tangential component of particle velocity----#
+                        vt      = v_i - vn*g/la.norm(g)
+                #----calculate updated particle velocity after collision----#
+                        v_i     = vt - restitution*vn*g/la.norm(g)
+
+                if self.m_InputData.getPrintForces() == "true":
+
+                    if cell !=-1:
+                        # if simTime % 0.015 < 1e-10:
+                        fluidvelmag = (v[0]**2)+(v[1]**2)+(v[2]**2)
+                        velpmag = (v_i[0]**2)+(v_i[1]**2)+(v[2]**2)
+                        liftp = shearGradLift*vol_p
+                        dragp = drag*vol_p
+                        buoyp = bodyForce*vol_p
+                        addmp = addedmass*vol_p
+                        flowp = undisturbedforce*vol_p
+                        shearGradmag = (liftp[0]**2)+(liftp[1]**2)+(liftp[2]**2)
+                        dragmag = (dragp[0]**2)+(dragp[1]**2)+(dragp[2]**2)
+                        buoymag = (buoyp[0]**2)+(buoyp[1]**2)+(buoyp[2]**2)
+                        addmmag = (addmp[0]**2)+(addmp[1]**2)+(addmp[2]**2)
+                        flowmag = (flowp[0]**2)+(flowp[1]**2)+(flowp[2]**2)
+
+
+                        if simTime == self.m_InputData.getSimulationStartTime():
+                            if p == 0:
+                                file = open(self.m_InputData.m_RootPath + "GVTKForces.csv", 'w')
+                                # file = open(self.m_InputData.m_RootPath + "GVTKVelocity.csv", 'w')
+                        else:
+                            file = open(self.m_InputData.m_RootPath + "GVTKForces.csv", 'a')
+                            # file = open(self.m_InputData.m_RootPath + "GVTKVelocity.csv", 'a')
+                        file.write("p,{},t,{},Drag,{},AddM,{},Flow,{},Buoy,{},Lift,{}\n".format(p,simTime,dragmag,addmmag,flowmag,buoymag,shearGradmag))
+                        # file.write("p,{},t,{},Velf,{},Velp,{}\n".format(p,simTime,fluidvelmag,velpmag))
+                    #-------calculate updated particle position due to change in velocity-------#
+
+                posP = posP + v_i*dT
+                self.m_LagrangianData.setX(p, posP)
+                self.m_LagrangianData.setVectorData(v_i, a_ArrayName='Velocity', a_DataID=p)
+                    #posP = posP + v_i_an*dT
 
     def vtkPolydataDistanceField(self, a_MeshFile, a_SurfaceFile, a_OutFile):
 

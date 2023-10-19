@@ -241,8 +241,11 @@ class SimInputs:
                     self.m_DataTimeStop     = float(tempList[6])
                     self.m_DataTimeDelta    = float(tempList[10])
                     self.m_DataPeriodic     = tempList[14].lower() == 'true'
-                    self.m_dataDt_prec = len(tempList[10].split('.')[1]) #---Delta precision should be directly read from input file and split for calculation edited by Sreeparna---#
+                    if self.m_DataPeriodic == "True":
 
+                        self.m_dataDt_prec = len(tempList[10].split('.')[1]) #---Delta precision should be directly read from input file and split for calculation edited by Sreeparna---#
+                    else:
+                        self.m_dataDt_prec = 0
                 # checked
                 elif lineDict[0].strip() == 'Simulation timing':
 
@@ -383,11 +386,19 @@ class SimInputs:
                     self.m_EntropyBounds = np.array([[EX0, EX1], [EY0, EY1], [EZ0, EZ1]]).astype(float)
                     self.m_EntropyRes = np.array([Xres, Yres, Zres]).astype(int)
 
+                elif lineDict[0].strip() == 'Print Forces':
+                    tempList = lineDict[1].strip().split()
+                    self.m_PrintForces = tempList[0].lower()
+
+
+
+
 
 
 
         inputFileObj.close()
-
+    def getPrintForces(self):
+        return self.m_PrintForces
     def getTracerInput(self):
         return self.m_TracerInput
 
