@@ -31,11 +31,11 @@ try:
 except:
     sys.exit("Import Failed")
 baseDir = "/mnt/c/MTH/317_HtoB/"
-pathtoCL = baseDir + "SV_Python_CL.vtp"
+pathtoCL = baseDir + "P317_CL.vtp"
 pathtoSurf = baseDir + "P317_SURF.stl"
 pathtoSDF = baseDir + "P317_SDF.vtu"
 pathOutput = baseDir + "OUT.vtu"
-pathFinal = baseDir + "SV_Python_CLv2.vtp"
+pathFinal = baseDir + "P317_CL_Radv2.vtp"
 
 
 def BFS_ID(polydata, start_point_id):
@@ -86,7 +86,75 @@ def find_nearest_points(tree, point, num_points=2):
 
     return [result.GetId(i) for i in range(result.GetNumberOfIds())]
 
+def line_exists(point_id1, point_id2, polydata):
+    edge = (point_id1, point_id2)
+    reverse_edge = (point_id2, point_id1)
 
+    num_cells = polydata.GetNumberOfCells()
+    for i in range(num_cells):
+        cell = polydata.GetCell(i)
+        for j in range(cell.GetNumberOfPoints() - 1):
+            cell_edge = (cell.GetPointId(j), cell.GetPointId(j + 1))
+            if cell_edge == edge or cell_edge == reverse_edge:
+                return True
+
+    return False
+def connect_points(polydata):
+    poly_data = polydata
+    points = poly_data.GetPoints()
+    cells = poly_data.GetLines()
+    num_cells = cells.GetNumberOfCells()
+
+    # Get branch information
+    branch_data = poly_data.GetCellData().GetArray('Length')
+
+    # Create a new vtkPolyData to store lines between branch points
+    lines_poly_data = vtk.vtkPolyData()
+    lines = vtk.vtkCellArray()
+    line_points = vtk.vtkPoints()
+    sum = 0
+    for i in range(num_cells):
+        cell = polydata.GetCell(i)
+        branch_val = branch_data.GetValue(i)
+        sum += cell.GetNumberOfPoints()
+        # Connect points within the current branc
+        for j in range(cell.GetNumberOfPoints() - 1):
+            point_id = cell.GetPointId(j)
+            next_point_id = cell.GetPointId(j + 1)
+
+            # Add line between consecutive points in the same branch
+            print("Point1", points.GetPoint(point_id))
+            print("Point2", points.GetPoint(next_point_id))
+            line_points.InsertNextPoint(points.GetPoint(point_id))
+            line_points.InsertNextPoint(points.GetPoint(next_point_id))
+
+            line = vtk.vtkLine()
+            line.GetPointIds().SetId(0, line_points.GetNumberOfPoints() - 2)
+            line.GetPointIds().SetId(1, line_points.GetNumberOfPoints() - 1)
+            lines.InsertNextCell(line)
+    print(sum)
+    # Connect all branches together
+    # for i in range(num_cells - 1):
+    #     cell = polydata.GetCell(i)
+    #     next_cell = polydata.GetCell(i + 1)
+    #
+    #     # Connect the last point of the current branch to the first point of the next branch
+    #     line_points.InsertNextPoint(points.GetPoint(cell.GetPointId(cell.GetNumberOfPoints() - 1)))
+    #     line_points.InsertNextPoint(points.GetPoint(next_cell.GetPointId(0)))
+    #
+    #     line = vtk.vtkLine()
+    #     line.GetPointIds().SetId(0, line_points.GetNumberOfPoints() - 2)
+    #     line.GetPointIds().SetId(1, line_points.GetNumberOfPoints() - 1)
+    #     lines.InsertNextCell(line)
+
+    # Set points and lines to the lines_poly_data
+    lines_poly_data.SetPoints(line_points)
+    lines_poly_data.SetLines(lines)
+    # Write the updated data to a new VTP file
+    writer = vtk.vtkXMLPolyDataWriter()
+    writer.SetFileName(baseDir + 'output_lines_with_branches.vtp')
+    writer.SetInputData(lines_poly_data)
+    writer.Write()
 
 def clean_data(data):
     point_data = data.GetPointData()
@@ -218,7 +286,7 @@ def SDF(sdf_file, surface_file, out_File):
     locatorObj = grid.m_Locator
 
     d   = grid.gridInterpolateNodalBasis(posP,'sdf', a_GetGradient=False, a_GetStatus=False, a_DataDim=1, a_DataType='double')
-    # print(d)
+    print(d)
     return(grid, locatorObj)
 
 
@@ -236,8 +304,8 @@ numPts  = data.GetNumberOfPoints()
 # add_points_between(data, 10)
 #
 # data = BranchID(data)
-# data = connect_points(data)
-# sys.exit()
+data = connect_points(data)
+sys.exit()
 
 
 # Write the modified data (without arrays) to a new VTP file
@@ -252,7 +320,7 @@ coords = vtk_to_numpy(P_coords)
 
 
 grid, locator = SDF(pathtoSDF, pathtoSurf, pathOutput)
-
+SDF_val = grid.gridInterpolateNodalBasis(coords[0],'sdf', a_GetGradient=False, a_GetStatus=False, a_DataDim=1, a_DataType='double')
 #
 # Create a vtkPoints object and store the points in it
 points = vtkPoints()
