@@ -36,6 +36,59 @@ pathtoSurf = baseDir + "P317_SURF.stl"
 pathtoSDF = baseDir + "P317_SDF.vtu"
 pathOutput = baseDir + "OUT.vtu"
 pathFinal = baseDir + "P317_CL_Radv2.vtp"
+def add_points_between(centerline, num_points_to_add):
+
+    num_cells = centerline.GetNumberOfCells()
+
+    # Define the number of points you want to add between the existing points
+    num_points_to_add = 10  # Change this value according to your needs
+
+    # Create a new polydata to store the interpolated points
+    new_centerline = vtk.vtkPolyData()
+    points = vtk.vtkPoints()
+    new_centerline.SetPoints(points)
+
+    # Create cells object to store lines connecting the points
+    polylines = vtk.vtkCellArray()
+    new_centerline.SetLines(polylines)
+    for i in range(centerline.GetCellData().GetNumberOfArrays()):
+        new_centerline.GetCellData().AddArray(centerline.GetCellData().GetArray(i))
+    # Iterate through each cell in the centerline
+    for cell_id in range(num_cells):
+        cell = centerline.GetCell(cell_id)
+        num_points_in_cell = cell.GetNumberOfPoints()
+
+        # Retrieve existing points in the current cell
+        existing_points = [cell.GetPoints().GetPoint(i) for i in range(num_points_in_cell)]
+
+        # Interpolate points between the existing points
+        interpolated_points = []
+        for i in range(num_points_in_cell - 1):
+            for j in range(num_points_to_add + 1):  # +1 to include the end point
+                t = j / float(num_points_to_add + 1)
+                new_point = [
+                    existing_points[i][k] + t * (existing_points[i + 1][k] - existing_points[i][k])
+                    for k in range(3)
+                ]
+                interpolated_points.append(new_point)
+            if i == num_points_in_cell - 2:
+                # print("here")
+                last_point = existing_points[i+1]
+                interpolated_points.append(last_point)
+
+        # Add points and connect them using a polyline within the current cell
+        polyline = vtk.vtkPolyLine()
+        for new_point in interpolated_points:
+            point_id = points.InsertNextPoint(new_point)
+            polyline.GetPointIds().InsertNextId(point_id)
+        polylines.InsertNextCell(polyline)
+    # writer = vtk.vtkXMLPolyDataWriter()
+    # writer.SetFileName(baseDir + "interpolated_centerline.vtp")  # Replace with your desired output file name
+    # writer.SetInputData(new_centerline)
+    # writer.Write()
+    print("More Points Added")
+    return new_centerline
+
 def check_point_line_membership(centerline, point_id_to_check):
     num_cells = centerline.GetNumberOfCells()
     occurrences = 0
@@ -248,4 +301,5 @@ if __name__ == "__main__":
     reader.Update()
 
     data = reader.GetOutput()
+    data = add_points_between(data, 10)
     Generate_Clean(data)

@@ -112,53 +112,58 @@ def clean_data(data):
     for i in range(field_data.GetNumberOfArrays()):
         field_data.RemoveArray(i)
 
-def add_points_between(polydata, num_points_to_add):
+def add_points_between(centerline, num_points_to_add):
 
-    points = polydata.GetPoints()
-    lines = polydata.GetLines()
-    cells = polydata.GetCellData()
+    num_cells = centerline.GetNumberOfCells()
 
-    new_points = vtk.vtkPoints()
-    new_lines = vtk.vtkCellArray()
+    # Define the number of points you want to add between the existing points
+    num_points_to_add = 10  # Change this value according to your needs
 
-    print("here",polydata.GetNumberOfCells())
+    # Create a new polydata to store the interpolated points
+    new_centerline = vtk.vtkPolyData()
+    points = vtk.vtkPoints()
+    new_centerline.SetPoints(points)
 
-    # Add points and create lines between existing points
-    lines = polydata.GetLines()
-    lines.InitTraversal()
+    # Create cells object to store lines connecting the points
+    polylines = vtk.vtkCellArray()
+    new_centerline.SetLines(polylines)
+    for i in range(centerline.GetCellData().GetNumberOfArrays()):
+        new_centerline.GetCellData().AddArray(centerline.GetCellData().GetArray(i))
+    # Iterate through each cell in the centerline
+    for cell_id in range(num_cells):
+        cell = centerline.GetCell(cell_id)
+        num_points_in_cell = cell.GetNumberOfPoints()
 
+        # Retrieve existing points in the current cell
+        existing_points = [cell.GetPoints().GetPoint(i) for i in range(num_points_in_cell)]
 
-    while True:
-        line = vtk.vtkIdList()
-        if lines.GetNextCell(line):
-            num_points_in_line = line.GetNumberOfIds()
-            print(num_points_in_line)
-            for i in range(num_points_in_line - 1):
-                pt_id_1 = line.GetId(i)
-                pt_id_2 = line.GetId(i + 1)
+        # Interpolate points between the existing points
+        interpolated_points = []
+        for i in range(num_points_in_cell - 1):
+            for j in range(num_points_to_add + 1):  # +1 to include the end point
+                t = j / float(num_points_to_add + 1)
+                new_point = [
+                    existing_points[i][k] + t * (existing_points[i + 1][k] - existing_points[i][k])
+                    for k in range(3)
+                ]
+                interpolated_points.append(new_point)
+            if i == num_points_in_cell - 2:
+                # print("here")
+                last_point = existing_points[i+1]
+                interpolated_points.append(last_point)
 
-                # Get the coordinates of the two points
-                point1 = polydata.GetPoint(pt_id_1)
-                point2 = polydata.GetPoint(pt_id_2)
-
-                # Calculate the step size for adding points along the line
-                step = 1.0 / (num_points_to_add + 1)
-                for j in range(1, num_points_to_add + 1):
-                    # Interpolate points along the line segment
-                    interpolated_point = [
-                        point1[k] + (point2[k] - point1[k]) * step * j
-                        for k in range(3)
-                    ]
-                    # Add the new point to the polydata
-                    new_point_id = polydata.GetPoints().InsertNextPoint(interpolated_point)
-                    # Add the new point ID to the line
-                    line.InsertId(i + j, new_point_id)
-
-        else:
-            break
-
-    # Update the polydata after modifications
-    polydata.Modified()
+        # Add points and connect them using a polyline within the current cell
+        polyline = vtk.vtkPolyLine()
+        for new_point in interpolated_points:
+            point_id = points.InsertNextPoint(new_point)
+            polyline.GetPointIds().InsertNextId(point_id)
+        polylines.InsertNextCell(polyline)
+    # writer = vtk.vtkXMLPolyDataWriter()
+    # writer.SetFileName(baseDir + "interpolated_centerline.vtp")  # Replace with your desired output file name
+    # writer.SetInputData(new_centerline)
+    # writer.Write()
+    print("More Points Added")
+    return new_centerline
 
 def BranchID(polydata):
     cell_data = polydata.GetCellData()
@@ -241,10 +246,10 @@ numPts  = data.GetNumberOfPoints()
 
 
 # Write the modified data (without arrays) to a new VTP file
-writer = vtk.vtkXMLPolyDataWriter()
-writer.SetFileName(baseDir + "modified_file.vtp")  # Output file name
-writer.SetInputData(data)
-writer.Write()
+# writer = vtk.vtkXMLPolyDataWriter()
+# writer.SetFileName(baseDir + "modified_file.vtp")  # Output file name
+# writer.SetInputData(data)
+# writer.Write()
 
 P_coords = data.GetPoints().GetData()
 coords = vtk_to_numpy(P_coords)
